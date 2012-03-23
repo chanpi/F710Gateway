@@ -58,3 +58,21 @@ SOCKET I4C3DDIAccessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCSTR
 	}
 	return socketHandler;
 }
+
+BOOL I4C3DDIAccessor::SetConnectingSocket(const SOCKET& socketHandler, const struct sockaddr_in* pAddress) {
+	BOOL bUse = TRUE;
+	setsockopt(socketHandler, SOL_SOCKET, SO_REUSEADDR, (const char*)&bUse, sizeof(bUse));
+	int nResult = 0;
+
+	TCHAR szError[I4C3D_BUFFER_SIZE] = {0};
+
+	nResult = connect(socketHandler, (const sockaddr*)pAddress, sizeof(*pAddress));
+	if (nResult == SOCKET_ERROR) {
+		_stprintf_s(szError, _countof(szError), _T("[ERROR] connect() : %d"), WSAGetLastError());
+		ReportError(szError);
+		LogDebugMessage(Log_Error, szError);
+		closesocket(socketHandler);
+		return FALSE;
+	}
+	return TRUE;
+}

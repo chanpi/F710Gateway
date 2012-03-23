@@ -15,9 +15,9 @@ public:
 	void CheckInput(I4C3DDIContext* pContext);
 
 private:
-	HRESULT InitializeDirectInput(I4C3DDIContext* pContext);
+	BOOL InitializeDirectInput(I4C3DDIContext* pContext);
 	void InitializeFunctionMap(I4C3DDIContext* pContext);
-	LPVOID SearchFunctionByKey(LPCTSTR key);
+	LPVOID SearchFunctionByKey(LPCTSTR tempKey);
 	void ReadConfigurationFile(I4C3DDIContext* pContext);
 
 	void UnInitialize(I4C3DDIContext* pContext);

@@ -7,6 +7,8 @@
 #include "Miscellaneous.h"
 #include <dinput.h>
 #include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -21,7 +23,10 @@ static LPDIRECTINPUTDEVICE8 g_pDIDev	= NULL;	// DirectInput
 static DIDEVCAPS g_diDevCaps;					// ジョイスティックの能力
 static I4C3DDICommandSet g_CommandSet	= {0};
 
-static map<LPCTSTR, LPVOID> g_FunctionMap;		// 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
+static bool success = false;
+const int STICK_THRESHOLD	= 550;
+
+static map<wstring, LPVOID> g_FunctionMap;		// 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
 //static map<wstring, LPVOID> g_FunctionMap;		// 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
 
 static const PCTSTR TAG_BUTTON_X		= _T("BUTTON_X");
@@ -71,17 +76,23 @@ BOOL I4C3DDICore::Start(I4C3DDIContext* pContext)
 	// 設定ファイルを読む
 	ReadConfigurationFile(pContext);
 	// DirectInputの初期化
-	InitializeDirectInput(pContext);
+
+	if (!InitializeDirectInput(pContext)) {
+		return FALSE;
+	}
 
 	pContext->pCommandSet = &g_CommandSet;
 
 	USHORT uI4C3DModulePort = 0;
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(_T("port")), _T("%u"), &uI4C3DModulePort);
+	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(_T("port")), _T("%hu"), &uI4C3DModulePort);
 
 	I4C3DDIAccessor accessor;
 	pContext->sender = accessor.InitializeTCPSocket((sockaddr_in*)&pContext->address, "127.0.0.1", TRUE, uI4C3DModulePort);
 	if (pContext->sender == INVALID_SOCKET) {
 		LogDebugMessage(Log_Error, _T("InitializeSocket <I4C3DDIModules::PrepareTargetController>"));
+		return FALSE;
+	}
+	if (!accessor.SetConnectingSocket(pContext->sender, &pContext->address)) {
 		return FALSE;
 	}
 	return TRUE;
@@ -128,13 +139,12 @@ void I4C3DDICore::UnInitialize(I4C3DDIContext* pContext)
 	}
 }
 
-HRESULT I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
+BOOL I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 {
 	HRESULT hr;
-	static bool success = false;
 
 	if (success) {
-		return S_OK;
+		return TRUE;
 	}
 
 	// DirectInputの作成
@@ -143,7 +153,7 @@ HRESULT I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 	if ( FAILED( hr ) ) {
 		ReportError(_T("[ERROR] DirectInput8Create()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] DirectInput8Create()"));
-		return hr;
+		return FALSE;
 	}
 
 	// デバイスを列挙して作成
@@ -151,7 +161,7 @@ HRESULT I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 	if ( FAILED( hr ) || g_pDIDev == NULL ) {
 		ReportError(_T("[ERROR] EnumDevices()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumDevices()"));
-		return hr;
+		return FALSE;
 	}
 
 	// データ形式を設定
@@ -159,15 +169,15 @@ HRESULT I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 	if ( FAILED( hr ) ) {
 		ReportError(_T("[ERROR] SetDataFormat()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] SetDataFormat()"));
-		return hr;
+		return FALSE;
 	}
 
-	// 協調モードを設定（フォアグラウンド＆非排他モード）
-	hr = g_pDIDev->SetCooperativeLevel( pContext->hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND );
+	// 協調モードを設定（バックグラウンド＆非排他モード）
+	hr = g_pDIDev->SetCooperativeLevel( pContext->hWnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND );
 	if ( FAILED( hr ) ) {
 		ReportError(_T("[ERROR] SetCooperativeLevel()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] SetCooperativeLevel()"));
-		return hr;
+		return FALSE;
 	}
 
 	// コールバック関数を使って各軸のモードを設定
@@ -175,13 +185,13 @@ HRESULT I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 	if ( FAILED( hr ) ) {
 		ReportError(_T("[ERROR] EnumObjects()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumObjects()"));
-		return hr;
+		return FALSE;
 	}
 	// 入力制御開始
 	g_pDIDev->Acquire();
 
 	success = true;
-	return S_OK;
+	return TRUE;
 }
 
 // コマンドとその関数とをマップに格納
@@ -194,29 +204,30 @@ void I4C3DDICore::InitializeFunctionMap(I4C3DDIContext* pContext)
 	}
 
 	// mapは同一キーの場合上書きされる
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_FORWARD"), pContext->pController->GoForward) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_BACKWARD"), pContext->pController->GoBackward) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_UP"), pContext->pController->GoUp) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_DOWN"), pContext->pController->GoDown) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_LEFT"), pContext->pController->GoLeft) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("GO_RIGHT"), pContext->pController->GoRight) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("CAMERA_UP"), pContext->pController->CameraUp) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("CAMERA_DOWN"), pContext->pController->CameraDown) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("CAMERA_LEFT"), pContext->pController->CameraLeft) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("CAMERA_RIGHT"), pContext->pController->CameraRight) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("SPEED_UP"), pContext->pController->ChangeSpeed) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("ANIM01_START"), pContext->pController->StartAnimation1) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("ANIM02_START"), pContext->pController->StartAnimation2) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("ANIM03_START"), pContext->pController->StartAnimation3) );
-	g_FunctionMap.insert( map<LPCTSTR, LPVOID>::value_type(_T("ANIM04_START"), pContext->pController->StartAnimation4) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_FORWARD"), &pContext->pController->GoForward) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_BACKWARD"), &pContext->pController->GoBackward) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_UP"), &pContext->pController->GoUp) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_DOWN"), &pContext->pController->GoDown) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_LEFT"), &pContext->pController->GoLeft) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("GO_RIGHT"), &pContext->pController->GoRight) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_UP"), &pContext->pController->CameraUp) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_DOWN"), &pContext->pController->CameraDown) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_LEFT"), &pContext->pController->CameraLeft) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_RIGHT"), &pContext->pController->CameraRight) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("SPEED_UP"), &pContext->pController->ChangeSpeed) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM01_START"), &pContext->pController->StartAnimation1) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM02_START"), &pContext->pController->StartAnimation2) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM03_START"), &pContext->pController->StartAnimation3) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM04_START"), &pContext->pController->StartAnimation4) );
 
 	success = true;
 }
 
-LPVOID I4C3DDICore::SearchFunctionByKey(LPCTSTR key)
+LPVOID I4C3DDICore::SearchFunctionByKey(LPCTSTR tempKey)
 {
-	if (key != NULL) {
-		map<LPCTSTR, LPVOID>::iterator it = g_FunctionMap.find(key);
+	wstring key = (tempKey == NULL) ? _T("") : tempKey;
+	if (!key.empty()) {
+		map<wstring, LPVOID>::iterator it = g_FunctionMap.find(key);
 		if (it != g_FunctionMap.end()) {
 			return it->second;
 		}
@@ -240,8 +251,6 @@ void SearchAnimationByKey(LPSTR destination, LPCTSTR key)
 
 void I4C3DDICore::ReadConfigurationFile(I4C3DDIContext* pContext)
 {
-	LPCSTR key = NULL;
-
 	g_CommandSet.BUTTON_X = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(TAG_BUTTON_X));
 	g_CommandSet.BUTTON_A = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(TAG_BUTTON_A));
 	g_CommandSet.BUTTON_B = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(TAG_BUTTON_B));
@@ -325,130 +334,144 @@ void I4C3DDICore::CheckInput(I4C3DDIContext* pContext)
 {
 	DIJOYSTATE2 dijs = {0};
 	HRESULT hr;
-	void (*func)(I4C3DDIContext*) = NULL;
+	vector<LPVOID> functionList;
+
+	if (!success) {
+		return;
+	}
 
 	hr = g_pDIDev->GetDeviceState( sizeof( DIJOYSTATE2 ), &dijs );
 	if ( SUCCEEDED( hr ) ) {
 		// Xボタン
 		if (dijs.rgbButtons[0] & 0x80) {
 			OutputDebugString(_T("Key>> X\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_X;
-
+			functionList.push_back(g_CommandSet.BUTTON_X);
+		}
 		// Aボタン
-		} else if (dijs.rgbButtons[1] & 0x80) {
+		if (dijs.rgbButtons[1] & 0x80) {
 			OutputDebugString(_T("Key>> A\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_A;
-
+			functionList.push_back(g_CommandSet.BUTTON_A);
+		}
 		// Bボタン
-		} else if (dijs.rgbButtons[2] & 0x80) {
+		if (dijs.rgbButtons[2] & 0x80) {
 			OutputDebugString(_T("Key>> B\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_B;
-
+			functionList.push_back(g_CommandSet.BUTTON_B);
+		}
 		// Yボタン
-		} else if (dijs.rgbButtons[3] & 0x80) {
+		if (dijs.rgbButtons[3] & 0x80) {
 			OutputDebugString(_T("Key>> Y\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_Y;
-
+			functionList.push_back(g_CommandSet.BUTTON_Y);
+		}
 		// LBボタン
-		} else if (dijs.rgbButtons[4] & 0x80) {
+		if (dijs.rgbButtons[4] & 0x80) {
 			OutputDebugString(_T("Key>> LB\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_LB;
-
+			functionList.push_back(g_CommandSet.BUTTON_LB);
+		}
 		// RBボタン
-		} else if (dijs.rgbButtons[5] & 0x80) {
+		if (dijs.rgbButtons[5] & 0x80) {
 			OutputDebugString(_T("Key>> RB\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_RB;
-
+			functionList.push_back(g_CommandSet.BUTTON_RB);
+		}
 		// LTボタン
-		} else if (dijs.rgbButtons[6] & 0x80) {
+		if (dijs.rgbButtons[6] & 0x80) {
 			OutputDebugString(_T("Key>> LT\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_LT;
-
+			functionList.push_back(g_CommandSet.BUTTON_LT);
+		}
 		// RTボタン
-		} else if (dijs.rgbButtons[7] & 0x80) {
+		if (dijs.rgbButtons[7] & 0x80) {
 			OutputDebugString(_T("Key>> RT\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_RT;
-
+			functionList.push_back(g_CommandSet.BUTTON_RT);
+		}
 		// BACKボタン
-		} else if (dijs.rgbButtons[8] & 0x80) {
+		if (dijs.rgbButtons[8] & 0x80) {
 			OutputDebugString(_T("Key>> BACK\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_BACK;
-
+			functionList.push_back(g_CommandSet.BUTTON_BACK);
+		}
 		// STARTボタン
-		} else if (dijs.rgbButtons[9] & 0x80) {
+		if (dijs.rgbButtons[9] & 0x80) {
 			OutputDebugString(_T("Key>> START\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_START;
+			functionList.push_back(g_CommandSet.BUTTON_START);
+		}
 
 		// 方向キー上
-		} else if (dijs.lY == -1000) {
+		if (dijs.rgdwPOV[0] == 0) {
 			OutputDebugString(_T("Key>> UP\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_UP;
-
+			functionList.push_back(g_CommandSet.BUTTON_UP);
 		// 方向キー下
-		} else if (dijs.lY == 1000) {
+		} else if (dijs.rgdwPOV[0] == 18000) {
 			OutputDebugString(_T("Key>> DOWN\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_DOWN;
-
-		// 方向キー左
-		} else if (dijs.lX == -1000) {
-			OutputDebugString(_T("Key>> LEFT\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_LEFT;
+			functionList.push_back(g_CommandSet.BUTTON_DOWN);
+		}
 
 		// 方向キー右
-		} else if (dijs.lX == 1000) {
+		if (dijs.rgdwPOV[0] == 9000) {
 			OutputDebugString(_T("Key>> RIGHT\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.BUTTON_RIGHT;
+			functionList.push_back(g_CommandSet.BUTTON_RIGHT);
+		// 方向キー左
+		} else if (dijs.rgdwPOV[0] == 27000) {
+			OutputDebugString(_T("Key>> LEFT\n"));
+			functionList.push_back(g_CommandSet.BUTTON_LEFT);
+		}
 
 		// 左スティック
-		} else if (dijs.rgdwPOV[0] == 0) {
+		if (dijs.lY <= -STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick L>> 0\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_L_UP;
-
-		} else if (dijs.rgdwPOV[0] == 9000) {
-			OutputDebugString(_T("Stick L>> 90\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_L_RIGHT;
-
-		} else if (dijs.rgdwPOV[0] == 18000) {
+			functionList.push_back(g_CommandSet.STICK_L_UP);
+		} else if (dijs.lY >= STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick L>> 180\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_L_DOWN;
-
-		} else if (dijs.rgdwPOV[0] == 27000) {
+			functionList.push_back(g_CommandSet.STICK_L_DOWN);
+		}
+		//if ()
+		//{
+		//	TCHAR szBuffer[128];
+		//	_stprintf_s(szBuffer, 128, _T("dijs.lY=%d, dijs.lX=%d\n"), dijs.lY, dijs.lX);
+		//	OutputDebugString(szBuffer);
+		//}
+		
+		if (dijs.lX <= -STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick L>> 270\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_L_LEFT;
+			functionList.push_back(g_CommandSet.STICK_L_LEFT);
+
+		} else if (dijs.lX >= STICK_THRESHOLD) {
+			OutputDebugString(_T("Stick L>> 90\n"));
+			functionList.push_back(g_CommandSet.STICK_L_RIGHT);
+		}
 
 		// 右スティック
-		} else if (dijs.lZ == -1000) {
+		if (dijs.lZ <= -STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick R>> -1000(left)\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_R_LEFT;
+			functionList.push_back(g_CommandSet.STICK_R_LEFT);
 
-		} else if (dijs.lZ == 1000) {
+		} else if (dijs.lZ >= STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick R>> 1000(right)\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_R_RIGHT;
+			functionList.push_back(g_CommandSet.STICK_R_RIGHT);
 
-		} else if (dijs.lRz == -1000) {
+		}
+		
+		if (dijs.lRz <= -STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick R>> -1000(up)\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_R_LEFT;
+			functionList.push_back(g_CommandSet.STICK_R_UP);
 
-		} else if (dijs.lRz == 1000) {
+		} else if (dijs.lRz >= STICK_THRESHOLD) {
 			OutputDebugString(_T("Stick R>> 1000(down)\n"));
-			func = (void (*)(I4C3DDIContext*))g_CommandSet.STICK_R_RIGHT;
+			functionList.push_back(g_CommandSet.STICK_R_DOWN);
 
-		//} else {
-		//	// dijs.lRz　1000と-1000で上下が見分けられそうだ
-		//	TCHAR buffer[32];
-		//	//_stprintf_s(buffer, _T("R>> %d %d %d : %d %d %d\n"), dijs.lARx, dijs.lARy, dijs.lARz, dijs.lAX, dijs.lAY, dijs.lAZ);
-		//	//_stprintf_s(buffer, _T("R>> %d %d %d : %d %d %d\n"), dijs.lFRx, dijs.lFRy, dijs.lFRz, dijs.lFX, dijs.lFY, dijs.lFZ);
-		//	//_stprintf_s(buffer, _T("R>> %d %d %d : %d %d %d\n"), dijs.lRx, dijs.lRy, dijs.lRz, dijs.lVRx, dijs.lVRy, dijs.lVRz);
-		//	_stprintf_s(buffer, _T("R>> %d : %d\n"), dijs.lRz, dijs.lZ);	// dijs.lRz:1000->下 -1000->上	// dijs.lZ:1000->右 -1000->左
-		//	OutputDebugString(buffer);
 		}
 
-		if (func != NULL) {
-			(*func)(pContext);
+		if (!functionList.empty()) {
+			vector<LPVOID>::iterator it = functionList.begin();
+			void (*func)(I4C3DDIContext*) = NULL;
+			for (; it != functionList.end(); it++) {
+				func = (void (*)(I4C3DDIContext*))*it;
+				if (func != NULL) {
+					(*func)(pContext);
+				}
+			}
+			pContext->pController->NormalSpeed(pContext);
 		}
 
-	} else if ( hr == DIERR_INPUTLOST ) {
+	} else if ( hr == DIERR_INPUTLOST || hr == DIERR_UNPLUGGED ) {
 		g_pDIDev->Acquire();
-		OutputDebugString(_T("g_pDIDev->Acquire()\n"));
+		LogDebugMessage(Log_Debug, _T("g_pDIDev->Acquire()\n"));
 	}
 }

@@ -4,7 +4,7 @@
 class I4C3DDIControl
 {
 public:
-	I4C3DDIControl(void);
+	I4C3DDIControl(char cTermination);
 	~I4C3DDIControl(void);
 
 	static void ChangeSpeed(I4C3DDIContext* pContext);

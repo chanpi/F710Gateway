@@ -7,17 +7,25 @@
 using namespace std;
 
 const double M_PI = asin(1.0) * 4.0;
+const int TUMBLE_DELTA	= 20;
+const int TRACK_DELTA	= 120;
+const int DOLLY_DELTA	= 10;
+static int speed = 1;
 
 static void CreateCommand(char* buffer, int bufferLen, I4C3DDIContext* pContext);
 static CRITICAL_SECTION g_lock;
+static char g_cTermination = '?';
 
-I4C3DDIControl::I4C3DDIControl(void)
+I4C3DDIControl::I4C3DDIControl(char cTermination)
 {
+	g_cTermination = cTermination;
+	InitializeCriticalSection(&g_lock);
 }
 
 
 I4C3DDIControl::~I4C3DDIControl(void)
 {
+	DeleteCriticalSection(&g_lock);
 }
 
 
@@ -42,48 +50,48 @@ void I4C3DDIControl::Execute(I4C3DDIContext* pContext, const char* message)
 
 void CreateCommand(char* buffer, int bufferLen, I4C3DDIContext* pContext)
 {
-	sprintf_s(buffer, bufferLen, "POSORIENT PHR CAMERA %d %d %d %d %d %d?",
+	sprintf_s(buffer, bufferLen, "POSORIENT PHR CAMERA %d %d %d %d %d %d%c",
 		pContext->pCommandSet->x, pContext->pCommandSet->y, pContext->pCommandSet->z,
-		pContext->pCommandSet->p, pContext->pCommandSet->h, pContext->pCommandSet->r);
+		pContext->pCommandSet->p, pContext->pCommandSet->h, pContext->pCommandSet->r, g_cTermination);
 }
 
 ///////////////// スピード（移動量）の変更 /////////////////
 void I4C3DDIControl::ChangeSpeed(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->speed = 2;
+	speed = 2;
 }
 
 void I4C3DDIControl::NormalSpeed(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->speed = 1;
+	speed = 1;
 }
 
 ///////////////// ANIMATION /////////////////
 void I4C3DDIControl::StartAnimation1(I4C3DDIContext* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "ANIM %s START?", pContext->pCommandSet->animation01Title);
+	sprintf_s(message, _countof(message), "ANIM %s START%c", pContext->pCommandSet->animation01Title, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::StartAnimation2(I4C3DDIContext* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "ANIM %s START?", pContext->pCommandSet->animation02Title);
+	sprintf_s(message, _countof(message), "ANIM %s START%c", pContext->pCommandSet->animation02Title, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::StartAnimation3(I4C3DDIContext* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "ANIM %s START?", pContext->pCommandSet->animation03Title);
+	sprintf_s(message, _countof(message), "ANIM %s START%c", pContext->pCommandSet->animation03Title, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::StartAnimation4(I4C3DDIContext* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "ANIM %s START?", pContext->pCommandSet->animation04Title);
+	sprintf_s(message, _countof(message), "ANIM %s START%c", pContext->pCommandSet->animation04Title, g_cTermination);
 	Execute(pContext, message);
 }
 
@@ -91,23 +99,16 @@ void I4C3DDIControl::StartAnimation4(I4C3DDIContext* pContext)
 // 前進（カメラxy）
 void I4C3DDIControl::GoForward(I4C3DDIContext* pContext)
 {
-	
-	pContext->pCommandSet->x += (int)(pContext->pCommandSet->move * pContext->pCommandSet->speed * sin(M_PI / 180 * pContext->pCommandSet->h));
-	pContext->pCommandSet->y -= (int)(pContext->pCommandSet->move * pContext->pCommandSet->speed * cos(M_PI / 180 * pContext->pCommandSet->h));
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "DOLLY %d %d%c", 0, -DOLLY_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
 // 後退（カメラxy）
 void I4C3DDIControl::GoBackward(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->x -= (int)(pContext->pCommandSet->move * pContext->pCommandSet->speed * sin(M_PI / 180 * pContext->pCommandSet->h));
-	pContext->pCommandSet->y += (int)(pContext->pCommandSet->move * pContext->pCommandSet->speed * cos(M_PI / 180 * pContext->pCommandSet->h));
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "DOLLY %d %d%c", 0, DOLLY_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
@@ -115,45 +116,29 @@ void I4C3DDIControl::GoBackward(I4C3DDIContext* pContext)
 ///////////////// TRACK(だめならPOSORIENTで) /////////////////
 void I4C3DDIControl::GoUp(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->z = pContext->pCommandSet->z + pContext->pCommandSet->height * pContext->pCommandSet->speed;
-    //root.heightText = string.Format("{0}", root.z);
-    //form1.HeightText = root.heightText;
-	
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "TRACK %d %d%c", 0, TRACK_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::GoDown(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->z = pContext->pCommandSet->z - pContext->pCommandSet->height * pContext->pCommandSet->speed;
-    //root.heightText = string.Format("{0}", root.z);
-    //form1.HeightText = root.heightText;
-	
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "TRACK %d %d%c", 0, -TRACK_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::GoLeft(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->z = pContext->pCommandSet->z + pContext->pCommandSet->height * pContext->pCommandSet->speed;
-    //root.heightText = string.Format("{0}", root.z);
-    //form1.HeightText = root.heightText;
-	
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "TRACK %d %d%c", -TRACK_DELTA * speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::GoRight(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->z = pContext->pCommandSet->z - pContext->pCommandSet->height * pContext->pCommandSet->speed;
-    //root.heightText = string.Format("{0}", root.z);
-    //form1.HeightText = root.heightText;
-	
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d?", pContext->pCommandSet->x, pContext->pCommandSet->y);
+	sprintf_s(message, _countof(message), "TRACK %d %d%c", TRACK_DELTA * speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
@@ -161,48 +146,28 @@ void I4C3DDIControl::GoRight(I4C3DDIContext* pContext)
 ///////////////// TUMBLE /////////////////
 void I4C3DDIControl::CameraUp(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->p -= pContext->pCommandSet->pitch * pContext->pCommandSet->speed;
-    //if (pContext->pCommandSet->p < -88)
-    //{
-    //    pContext->pCommandSet->p = -88;
-    //    pContext->pCommandSet->r = 0;
-    //}
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d?", 0, pContext->pCommandSet->p);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d%c", 0, -TUMBLE_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::CameraDown(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->p += pContext->pCommandSet->pitch * pContext->pCommandSet->speed;
-    //if (pContext->pCommandSet->p < -88)
-    //{
-    //    pContext->pCommandSet->p = -88;
-    //    pContext->pCommandSet->r = 0;
-    //}
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d?", 0, pContext->pCommandSet->p);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d%c", 0, TUMBLE_DELTA * speed, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::CameraLeft(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->h += pContext->pCommandSet->angle * pContext->pCommandSet->speed;
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	CreateCommand(message, _countof(message), pContext);
-	sprintf_s(message, _countof(message), "TUMBLE %d %d?", pContext->pCommandSet->h, 0);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d%c", -TUMBLE_DELTA * speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
 void I4C3DDIControl::CameraRight(I4C3DDIContext* pContext)
 {
-	pContext->pCommandSet->h -= pContext->pCommandSet->angle * pContext->pCommandSet->speed;
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	CreateCommand(message, _countof(message), pContext);
-	sprintf_s(message, _countof(message), "TUMBLE %d %d?", pContext->pCommandSet->h, 0);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d%c", TUMBLE_DELTA * speed, 0, g_cTermination);
 	Execute(pContext, message);
 }

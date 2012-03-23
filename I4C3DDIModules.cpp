@@ -148,7 +148,7 @@ BOOL PrepareTargetController(char cTermination)
 		delete g_Context.pController;
 		g_Context.pController = NULL;
 	}
-	g_Context.pController = new I4C3DDIControl;
+	g_Context.pController = new I4C3DDIControl(cTermination);
 
 	//// ‰Šú‰»
 	//if (g_Context.pController == NULL || !g_Context.pController->Initialize(&g_Context, cTermination)) {
