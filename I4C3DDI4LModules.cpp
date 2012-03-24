@@ -1,15 +1,15 @@
 #include "stdafx.h"
-#include "I4C3DDIModules.h"
-#include "I4C3DDIAnalyzeXML.h"
-#include "I4C3DDICore.h"
-#include "I4C3DDIControl.h"
+#include "I4C3DDI4LModules.h"
+#include "I4C3DDI4LAnalyzeXML.h"
+#include "I4C3DDI4LCore.h"
+#include "I4C3DDI4LControl.h"
 #include "Miscellaneous.h"
 
 static BOOL PrepareTargetController(char cTermination);
 static const PCTSTR TAG_TERMINATION	= _T("termination");
 
-static I4C3DDICore g_Core;
-static I4C3DDIContext g_Context;
+static I4C3DDI4LCore g_Core;
+static I4C3DDI4LContext g_Context;
 static BOOL g_bStarted = FALSE;
 
 /**
@@ -34,7 +34,7 @@ static BOOL g_bStarted = FALSE;
  * @see
  * I4C3DStop()
  */
-BOOL WINAPI I4C3DDIStart(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
+BOOL WINAPI I4C3DDI4LStart(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 {
 	if (g_bStarted) {
 		return TRUE;
@@ -44,15 +44,15 @@ BOOL WINAPI I4C3DDIStart(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 	ZeroMemory(&g_Context, sizeof(g_Context));
 	g_Context.hInst = hInst;
 	g_Context.hWnd = hWnd;
-	g_Context.pAnalyzer = new I4C3DDIAnalyzeXML();
+	g_Context.pAnalyzer = new I4C3DDI4LAnalyzeXML();
 	if (g_Context.pAnalyzer == NULL) {
 		ReportError(_T("[ERROR] メモリの確保に失敗しています。初期化は行われません。"));
-		I4C3DDIStop();
+		I4C3DDI4LStop();
 		return FALSE;
 	}
 	if (!g_Context.pAnalyzer->LoadXML(szXMLUri)) {
 		ReportError(_T("[ERROR] XMLのロードに失敗しています。初期化は行われません。"));
-		I4C3DDIStop();
+		I4C3DDI4LStop();
 		return FALSE;
 	}
 
@@ -93,13 +93,13 @@ BOOL WINAPI I4C3DDIStart(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 	}
 
 	if (!PrepareTargetController(cTermination)) {
-		I4C3DDIStop();
+		I4C3DDI4LStop();
 		return FALSE;
 	}
 
 	g_bStarted = g_Core.Start(&g_Context);
 	if (!g_bStarted) {
-		I4C3DDIStop();
+		I4C3DDI4LStop();
 	}
 	return g_bStarted;
 }
@@ -117,7 +117,7 @@ BOOL WINAPI I4C3DDIStart(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
  * @see
  * I4C3DStart()
  */
-void WINAPI I4C3DDIStop(void)
+void WINAPI I4C3DDI4LStop(void)
 {
 	g_Core.Stop(&g_Context);
 	if (g_Context.pAnalyzer != NULL) {
@@ -137,7 +137,7 @@ void WINAPI I4C3DDIStop(void)
 }
 
 // 入力チェック
-void WINAPI I4C3DDICheckInput(void)
+void WINAPI I4C3DDI4LCheckInput(void)
 {
 	g_Core.CheckInput(&g_Context);
 }
@@ -148,7 +148,7 @@ BOOL PrepareTargetController(char cTermination)
 		delete g_Context.pController;
 		g_Context.pController = NULL;
 	}
-	g_Context.pController = new I4C3DDIControl(cTermination);
+	g_Context.pController = new I4C3DDI4LControl(cTermination);
 
 	//// 初期化
 	//if (g_Context.pController == NULL || !g_Context.pController->Initialize(&g_Context, cTermination)) {

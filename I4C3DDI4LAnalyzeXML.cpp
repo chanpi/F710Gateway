@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "I4C3DDIAnalyzeXML.h"
-#include "I4C3DDIModulesDefs.h"
+#include "I4C3DDI4LAnalyzeXML.h"
+#include "I4C3DDI4LModulesDefs.h"
 #include "Miscellaneous.h"
 #include "XMLParser.h"
 #include <vector>
@@ -29,13 +29,13 @@ inline void SafeReleaseMap(map<PCTSTR, PCTSTR>* pMap)
 	}
 }
 
-I4C3DDIAnalyzeXML::I4C3DDIAnalyzeXML(void)
+I4C3DDI4LAnalyzeXML::I4C3DDI4LAnalyzeXML(void)
 {
 	g_pConfigPairContainer = new vector<config_pair>;
 }
 
 
-I4C3DDIAnalyzeXML::~I4C3DDIAnalyzeXML(void)
+I4C3DDI4LAnalyzeXML::~I4C3DDI4LAnalyzeXML(void)
 {
 	CleanupRootElement();
 	if (g_pConfigPairContainer) {
@@ -90,7 +90,7 @@ void CleanupRootElement(void)
  * 
  * XMLParser.dllを利用し、XMLをロードしオブジェクトにします。
  */
-BOOL I4C3DDIAnalyzeXML::LoadXML(PCTSTR szXMLUri)
+BOOL I4C3DDI4LAnalyzeXML::LoadXML(PCTSTR szXMLUri)
 {
 	CleanupRootElement();
 	if (!PathFileExists(szXMLUri)) {
@@ -120,7 +120,7 @@ BOOL I4C3DDIAnalyzeXML::LoadXML(PCTSTR szXMLUri)
  * @see
  * ReadGlobalTag()
  */
-PCTSTR I4C3DDIAnalyzeXML::GetGlobalValue(PCTSTR szKey)
+PCTSTR I4C3DDI4LAnalyzeXML::GetGlobalValue(PCTSTR szKey)
 {
 	if (!ReadGlobalTag()) {
 		ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
@@ -145,7 +145,7 @@ PCTSTR I4C3DDIAnalyzeXML::GetGlobalValue(PCTSTR szKey)
  * @see
  * ReadGlobalTag() | ReadSoftsTag()
  */
-PCTSTR I4C3DDIAnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
+PCTSTR I4C3DDI4LAnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
 {
 	//if (!this->ReadGlobalTag()) {
 	//	ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
@@ -184,7 +184,7 @@ PCTSTR I4C3DDIAnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
  * @see
  * GetGlobalValue()
  */
-BOOL I4C3DDIAnalyzeXML::ReadGlobalTag(void)
+BOOL I4C3DDI4LAnalyzeXML::ReadGlobalTag(void)
 {
 	if (g_pGlobalConfig == NULL) {
 		IXMLDOMNode* pGlobal = NULL;
@@ -214,7 +214,7 @@ BOOL I4C3DDIAnalyzeXML::ReadGlobalTag(void)
  * @see
  * GetSoftValue()
  */
-BOOL I4C3DDIAnalyzeXML::ReadSoftsTag(void)
+BOOL I4C3DDI4LAnalyzeXML::ReadSoftsTag(void)
 {
 	if (g_pConfigPairContainer->size() == 0) {
 

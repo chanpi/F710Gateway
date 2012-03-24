@@ -1,21 +1,21 @@
 ﻿========================================================================
- ダイナミック リンク ライブラリ: I4C3DDirectInputModules プロジェクトの概要
+ ダイナミック リンク ライブラリ: I4C3DDInput4LogicoolModules プロジェクトの概要
 ========================================================================
 
-この I4C3DDirectInputModules DLL は、AppWizard により作成されました。
+この I4C3DDInput4LogicoolModules DLL は、AppWizard により作成されました。
 
-このファイルには、I4C3DDirectInputModules 
+このファイルには、I4C3DDInput4LogicoolModules 
 アプリケーションを構成する各ファイルの内容の概要が含まれています。
 
 
-I4C3DDirectInputModules.vcxproj
+I4C3DDInput4LogicoolModules.vcxproj
     これは、アプリケーション ウィザードを使用して生成された VC++ 
     プロジェクトのメイン プロジェクト ファイルです。
     ファイルを生成した Visual C++ のバージョンに関する情報と、アプリケーション 
     ウィザードで選択されたプラットフォーム、
     構成、およびプロジェクト機能に関する情報が含まれています。
 
-I4C3DDirectInputModules.vcxproj.filters
+I4C3DDInput4LogicoolModules.vcxproj.filters
     これは、アプリケーション ウィザードで生成された VC++ プロジェクトのフィルター 
     ファイルです。 
     このファイルには、プロジェクト内のファイルとフィルターとの間の関連付けに関する
@@ -24,7 +24,7 @@ I4C3DDirectInputModules.vcxproj.filters
     示すために IDE で使用されます (たとえば、".cpp" ファイルは "ソース ファイル" 
     フィルターに関連付けられています)。
 
-I4C3DDirectInputModules.cpp
+I4C3DDInput4LogicoolModules.cpp
     これは、メインの DLL ソース ファイルです。
 
     この DLL の作成時には、シンボルがエクスポートされません。 このため、ビルド時に 
@@ -39,7 +39,7 @@ I4C3DDirectInputModules.cpp
 その他の標準ファイル :
 
 StdAfx.h、StdAfx.cpp
-    これらのファイルは、I4C3DDirectInputModules.pch 
+    これらのファイルは、I4C3DDInput4LogicoolModules.pch 
     という名前のプリコンパイル済みヘッダー (PCH) ファイルと、StdAfx.obj 
     という名前のプリコンパイル済みの型ファイルを構築するために使用されます。
 

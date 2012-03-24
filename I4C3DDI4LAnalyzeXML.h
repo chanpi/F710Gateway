@@ -1,9 +1,9 @@
 #pragma once
-class I4C3DDIAnalyzeXML
+class I4C3DDI4LAnalyzeXML
 {
 public:
-	I4C3DDIAnalyzeXML(void);
-	~I4C3DDIAnalyzeXML(void);
+	I4C3DDI4LAnalyzeXML(void);
+	~I4C3DDI4LAnalyzeXML(void);
 
 	// 引数つきコンストラクタを呼ばない場合は、別途呼び出すことができます。
 	BOOL LoadXML(PCTSTR szXMLUri);
