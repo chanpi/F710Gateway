@@ -16,7 +16,7 @@ public:
 
 private:
 	BOOL InitializeDirectInput(I4C3DDIContext* pContext);
-	void InitializeFunctionMap(I4C3DDIContext* pContext);
+	void InitializeFunctionMap(const I4C3DDIContext* pContext);
 	LPVOID SearchFunctionByKey(LPCTSTR tempKey);
 	void ReadConfigurationFile(I4C3DDIContext* pContext);
 

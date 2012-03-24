@@ -9,10 +9,10 @@ public:
 
 	static void ChangeSpeed(I4C3DDIContext* pContext);
 	static void NormalSpeed(I4C3DDIContext* pContext);
-	static void StartAnimation1(I4C3DDIContext* pContext);
-	static void StartAnimation2(I4C3DDIContext* pContext);
-	static void StartAnimation3(I4C3DDIContext* pContext);
-	static void StartAnimation4(I4C3DDIContext* pContext);
+	static void PlayMacro1(I4C3DDIContext* pContext);
+	static void PlayMacro2(I4C3DDIContext* pContext);
+	static void PlayMacro3(I4C3DDIContext* pContext);
+	static void PlayMacro4(I4C3DDIContext* pContext);
 	
 	// DOLLY
 	static void GoForward(I4C3DDIContext* pContext);	// 前進（カメラxy）

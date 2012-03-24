@@ -51,14 +51,9 @@ static const PCTSTR TAG_STICK_R_UP		= _T("STICK_R_UP");
 static const PCTSTR TAG_STICK_R_DOWN	= _T("STICK_R_DOWN");
 static const PCTSTR TAG_STICK_R_LEFT	= _T("STICK_R_LEFT");
 static const PCTSTR TAG_STICK_R_RIGHT	= _T("STICK_R_RIGHT");
-static const PCTSTR TAG_moveDelta		= _T("moveDelta");
-static const PCTSTR TAG_angleDelta		= _T("angleDelta");
-static const PCTSTR TAG_pitchDelta		= _T("pitchDelta");
-static const PCTSTR TAG_heightDelta		= _T("heightDelta");
-static const PCTSTR TAG_animation01Title	= _T("animation01Title");
-static const PCTSTR TAG_animation02Title	= _T("animation02Title");
-static const PCTSTR TAG_animation03Title	= _T("animation03Title");
-static const PCTSTR TAG_animation04Title	= _T("animation04Title");
+static const PCTSTR TAG_TUMBLE_DELTA	= _T("TUMBLE_DELTA");
+static const PCTSTR TAG_TRACK_DELTA		= _T("TRACK_DELTA");
+static const PCTSTR TAG_DOLLY_DELTA		= _T("DOLLY_DELTA");
 
 I4C3DDICore::I4C3DDICore(void)
 {
@@ -120,23 +115,6 @@ void I4C3DDICore::UnInitialize(I4C3DDIContext* pContext)
 		closesocket(pContext->sender);
 		pContext->sender = INVALID_SOCKET;
 	}
-
-	if (g_CommandSet.animation01Title) {
-		delete g_CommandSet.animation01Title;
-		g_CommandSet.animation01Title = NULL;
-	}
-	if (g_CommandSet.animation02Title) {
-		delete g_CommandSet.animation02Title;
-		g_CommandSet.animation02Title = NULL;
-	}
-	if (g_CommandSet.animation03Title) {
-		delete g_CommandSet.animation03Title;
-		g_CommandSet.animation03Title = NULL;
-	}
-	if (g_CommandSet.animation04Title) {
-		delete g_CommandSet.animation04Title;
-		g_CommandSet.animation04Title = NULL;
-	}
 }
 
 BOOL I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
@@ -195,7 +173,7 @@ BOOL I4C3DDICore::InitializeDirectInput(I4C3DDIContext* pContext)
 }
 
 // コマンドとその関数とをマップに格納
-void I4C3DDICore::InitializeFunctionMap(I4C3DDIContext* pContext)
+void I4C3DDICore::InitializeFunctionMap(const I4C3DDIContext* pContext)
 {
 	static bool success = false;
 
@@ -215,10 +193,10 @@ void I4C3DDICore::InitializeFunctionMap(I4C3DDIContext* pContext)
 	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_LEFT"), &pContext->pController->CameraLeft) );
 	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("CAMERA_RIGHT"), &pContext->pController->CameraRight) );
 	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("SPEED_UP"), &pContext->pController->ChangeSpeed) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM01_START"), &pContext->pController->StartAnimation1) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM02_START"), &pContext->pController->StartAnimation2) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM03_START"), &pContext->pController->StartAnimation3) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("ANIM04_START"), &pContext->pController->StartAnimation4) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("MACRO1"), &pContext->pController->PlayMacro1) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("MACRO2"), &pContext->pController->PlayMacro2) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("MACRO3"), &pContext->pController->PlayMacro3) );
+	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(_T("MACRO4"), &pContext->pController->PlayMacro4) );
 
 	success = true;
 }
@@ -233,20 +211,6 @@ LPVOID I4C3DDICore::SearchFunctionByKey(LPCTSTR tempKey)
 		}
 	}
 	return NULL;
-}
-
-void SearchAnimationByKey(LPSTR destination, LPCTSTR key)
-{
-	if (destination != NULL) {
-		delete destination;
-	}
-	g_CommandSet.animation01Title = new CHAR[_tcslen(key)];
-
-#if UNICODE || _UNICODE
-	WideCharToMultiByte(CP_ACP, 0, key, _tcslen(key), destination, sizeof(destination), NULL, NULL);
-#else
-	strcpy_s(destination, sizeof(destination), key);
-#endif
 }
 
 void I4C3DDICore::ReadConfigurationFile(I4C3DDIContext* pContext)
@@ -274,16 +238,9 @@ void I4C3DDICore::ReadConfigurationFile(I4C3DDIContext* pContext)
 	g_CommandSet.STICK_R_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(TAG_STICK_R_LEFT));
 	g_CommandSet.STICK_R_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(TAG_STICK_R_RIGHT));
 
-	// アニメーションタイトル
-	SearchAnimationByKey(g_CommandSet.animation01Title, pContext->pAnalyzer->GetGlobalValue(TAG_animation01Title));
-	SearchAnimationByKey(g_CommandSet.animation02Title, pContext->pAnalyzer->GetGlobalValue(TAG_animation02Title));
-	SearchAnimationByKey(g_CommandSet.animation03Title, pContext->pAnalyzer->GetGlobalValue(TAG_animation03Title));
-	SearchAnimationByKey(g_CommandSet.animation04Title, pContext->pAnalyzer->GetGlobalValue(TAG_animation04Title));
-
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_moveDelta), _T("%d"), &g_CommandSet.moveDelta);
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_angleDelta), _T("%d"), &g_CommandSet.angleDelta);
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_pitchDelta), _T("%d"), &g_CommandSet.pitchDelta);
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_heightDelta), _T("%d"), &g_CommandSet.heightDelta);
+	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_TUMBLE_DELTA), _T("%d"), &g_CommandSet.TUMBLE_DELTA);
+	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_TRACK_DELTA), _T("%d"), &g_CommandSet.TRACK_DELTA);
+	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TAG_DOLLY_DELTA), _T("%d"), &g_CommandSet.DOLLY_DELTA);
 }
 
 // ジョイスティックを列挙する関数
