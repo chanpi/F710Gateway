@@ -19,6 +19,8 @@ private:
 	void InitializeFunctionMap(const I4C3DDIContext* pContext);
 	LPVOID SearchFunctionByKey(LPCTSTR tempKey);
 	void ReadConfigurationFile(I4C3DDIContext* pContext);
+	BOOL CheckFunctionType(void (*func)(I4C3DDIContext*), I4C3DDIContext* pContext, BYTE* flag);
+	void KickFunctionByType(I4C3DDIContext* pContext, BYTE flag);
 
 	void UnInitialize(I4C3DDIContext* pContext);
 };
