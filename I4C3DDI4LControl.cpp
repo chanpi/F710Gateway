@@ -9,19 +9,16 @@ using namespace std;
 const double M_PI = asin(1.0) * 4.0;
 
 static void CreateCommand(char* buffer, int bufferLen, I4C3DDI4LContext* pContext);
-static CRITICAL_SECTION g_lock;
 static char g_cTermination = '?';
 
 I4C3DDI4LControl::I4C3DDI4LControl(char cTermination)
 {
 	g_cTermination = cTermination;
-	InitializeCriticalSection(&g_lock);
 }
 
 
 I4C3DDI4LControl::~I4C3DDI4LControl(void)
 {
-	DeleteCriticalSection(&g_lock);
 }
 
 
@@ -39,9 +36,7 @@ I4C3DDI4LControl::~I4C3DDI4LControl(void)
  */
 void I4C3DDI4LControl::Execute(I4C3DDI4LContext* pContext, const char* message)
 {
-	EnterCriticalSection(&g_lock);
 	send(pContext->sender, message, strlen(message), 0);
-	LeaveCriticalSection(&g_lock);
 }
 
 ///////////////// スピード（移動量）の変更 /////////////////
@@ -227,6 +222,7 @@ void I4C3DDI4LControl::PlayMacro32(I4C3DDI4LContext* pContext)
 // 前進（カメラxy）
 void I4C3DDI4LControl::GoForward(I4C3DDI4LContext* pContext)
 {
+
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, g_cTermination);
 	Execute(pContext, message);
