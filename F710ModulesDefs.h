@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 class F710AnalyzeXML;
-class F710Control;
+class F710AbstractControl;
 
 #define MAX_LOADSTRING			100
 #define I4C3D_BUFFER_SIZE		256
@@ -99,54 +99,57 @@ const PCTSTR TRACK_DELTA			= _T("TRACK_DELTA");
 const PCTSTR DOLLY_DELTA			= _T("DOLLY_DELTA");
 const PCTSTR CONTENTS				= _T("CONTENTS");
 
+struct F710Context;
+typedef void (F710AbstractControl::*pControlFunc)(struct F710Context*);
+
 typedef struct F710CommandSet {
-	LPVOID BUTTON_X;
-	LPVOID BUTTON_A;
-	LPVOID BUTTON_B;
-	LPVOID BUTTON_Y;
-	LPVOID BUTTON_LB;
-	LPVOID BUTTON_LT;
-	LPVOID BUTTON_RB;
-	LPVOID BUTTON_RT;
-	LPVOID BUTTON_BACK;
-	LPVOID BUTTON_START;
-	LPVOID BUTTON_LEFTSTICK;
-	LPVOID BUTTON_RIGHTSTICK;
+	pControlFunc BUTTON_X;
+	pControlFunc BUTTON_A;
+	pControlFunc BUTTON_B;
+	pControlFunc BUTTON_Y;
+	pControlFunc BUTTON_LB;
+	pControlFunc BUTTON_LT;
+	pControlFunc BUTTON_RB;
+	pControlFunc BUTTON_RT;
+	pControlFunc BUTTON_BACK;
+	pControlFunc BUTTON_START;
+	pControlFunc BUTTON_LEFTSTICK;
+	pControlFunc BUTTON_RIGHTSTICK;
 
 	// 十字キー
-	LPVOID BUTTON_UP;
-	LPVOID BUTTON_DOWN;
-	LPVOID BUTTON_LEFT;
-	LPVOID BUTTON_RIGHT;
-	LPVOID BUTTON_UPRIGHT;
-	LPVOID BUTTON_UPLEFT;
-	LPVOID BUTTON_DOWNRIGHT;
-	LPVOID BUTTON_DOWNLEFT;
+	pControlFunc BUTTON_UP;
+	pControlFunc BUTTON_DOWN;
+	pControlFunc BUTTON_LEFT;
+	pControlFunc BUTTON_RIGHT;
+	pControlFunc BUTTON_UPRIGHT;
+	pControlFunc BUTTON_UPLEFT;
+	pControlFunc BUTTON_DOWNRIGHT;
+	pControlFunc BUTTON_DOWNLEFT;
 
 	// 左アナログスティック
-	LPVOID STICK_L_UP;
-	LPVOID STICK_L_DOWN;
-	LPVOID STICK_L_LEFT;
-	LPVOID STICK_L_RIGHT;
+	pControlFunc STICK_L_UP;
+	pControlFunc STICK_L_DOWN;
+	pControlFunc STICK_L_LEFT;
+	pControlFunc STICK_L_RIGHT;
 
 	// 右アナログスティック
-	LPVOID STICK_R_UP;
-	LPVOID STICK_R_DOWN;
-	LPVOID STICK_R_LEFT;
-	LPVOID STICK_R_RIGHT;
+	pControlFunc STICK_R_UP;
+	pControlFunc STICK_R_DOWN;
+	pControlFunc STICK_R_LEFT;
+	pControlFunc STICK_R_RIGHT;
 
 	int TUMBLE_DELTA;
 	int TRACK_DELTA;
 	int DOLLY_DELTA;
 
 	int speed;
-
 	BYTE buttons[128];
 } F710CommandSet;
 
-typedef struct {
+typedef struct F710Context {
 	F710AnalyzeXML* pAnalyzer;
-	F710Control* pController;
+	BOOL bRTT4ECMode;
+	F710AbstractControl* pController;
 	HINSTANCE hInst;
 	HWND hWnd;
 

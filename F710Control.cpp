@@ -2,41 +2,19 @@
 #include "F710Control.h"
 #include "F710ModulesDefs.h"
 #include <vector>
-#include <math.h>
 
 using namespace std;
 
-const double M_PI = asin(1.0) * 4.0;
-
 static void CreateCommand(char* buffer, int bufferLen, F710Context* pContext);
-static char g_cTermination = '?';
 
 F710Control::F710Control(char cTermination)
+	:F710AbstractControl(cTermination)
 {
-	g_cTermination = cTermination;
 }
 
 
 F710Control::~F710Control(void)
 {
-}
-
-
-/**
- * @brief
- * ipodからの電文をTOPMOSTの3Dソフトに転送します。
- * 
- * @param szCommand
- * ipodから受信した電文。
- * 
- * @param commandLen
- * 電文長。
- * 
- * ipodからの電文をTOPMOSTの3Dソフトに転送します。転送はUDPで行います。
- */
-void F710Control::Execute(F710Context* pContext, const char* message)
-{
-	send(pContext->sender, message, strlen(message), 0);
 }
 
 ///////////////// スピード（移動量）の変更 /////////////////
@@ -51,12 +29,6 @@ void F710Control::NormalSpeed(F710Context* pContext)
 }
 
 ///////////////// MACRO /////////////////
-void F710Control::PlayMacro(F710Context* pContext, LPCSTR macroName)
-{
-	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "%s %c", macroName, g_cTermination);
-	Execute(pContext, message);
-}
 
 void F710Control::PlayMacro1(F710Context* pContext)
 {
@@ -222,9 +194,8 @@ void F710Control::PlayMacro32(F710Context* pContext)
 // 前進（カメラxy）
 void F710Control::GoForward(F710Context* pContext)
 {
-
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -232,7 +203,7 @@ void F710Control::GoForward(F710Context* pContext)
 void F710Control::GoBackward(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, -pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, -pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -241,28 +212,28 @@ void F710Control::GoBackward(F710Context* pContext)
 void F710Control::GoUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %d %d %c", pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %d %d %c", -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -272,7 +243,7 @@ void F710Control::GoUpRight(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -282,7 +253,7 @@ void F710Control::GoUpLeft(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -292,7 +263,7 @@ void F710Control::GoDownRight(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -302,7 +273,7 @@ void F710Control::GoDownLeft(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -311,28 +282,28 @@ void F710Control::GoDownLeft(F710Context* pContext)
 void F710Control::CameraUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, g_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -342,7 +313,7 @@ void F710Control::CameraUpRight(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -352,7 +323,7 @@ void F710Control::CameraUpLeft(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -362,7 +333,7 @@ void F710Control::CameraDownRight(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -372,6 +343,6 @@ void F710Control::CameraDownLeft(F710Context* pContext)
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
-		g_cTermination);
+		m_cTermination);
 	Execute(pContext, message);
 }

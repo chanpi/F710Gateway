@@ -2,11 +2,11 @@
 #include "F710ModulesDefs.h"
 #include "F710AbstractControl.h"
 
-class F710Control : public F710AbstractControl
+class F710TCPControl : public F710AbstractControl
 {
 public:
-	F710Control(char cTermination);
-	~F710Control(void);
+	F710TCPControl(F710Context* pContext, char cTermination);
+	~F710TCPControl(void);
 
 	void ChangeSpeed(F710Context* pContext);
 	void NormalSpeed(F710Context* pContext);
@@ -66,5 +66,8 @@ public:
 	void CameraUpLeft(F710Context* pContext);
 	void CameraDownRight(F710Context* pContext);
 	void CameraDownLeft(F710Context* pContext);
+
+private:
+	void ExecuteCameraCommand(F710Context* pContext);
 };
 

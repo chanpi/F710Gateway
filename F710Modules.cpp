@@ -3,10 +3,16 @@
 #include "F710AnalyzeXML.h"
 #include "F710Core.h"
 #include "F710Control.h"
+#include "F710TCPControl.h"
 #include "Miscellaneous.h"
 
 static BOOL PrepareTargetController(char cTermination);
+static const PCTSTR TAG_LOG			= _T("log");
+static const PCTSTR TAG_OFF			= _T("off");
+static const PCTSTR TAG_DEBUG		= _T("debug");
+static const PCTSTR TAG_INFO		= _T("info");
 static const PCTSTR TAG_TERMINATION	= _T("termination");
+static const PCTSTR TAG_RTT4TCPMODE	= _T("rtt4tcp_mode");
 
 static F710Core g_Core;
 static F710Context g_Context;
@@ -92,6 +98,7 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 		cTermination = cszTermination[0];
 	}
 
+	g_Context.bRTT4ECMode = (_tcsicmp(g_Context.pAnalyzer->GetGlobalValue(TAG_RTT4TCPMODE), _T("on")) == 0);
 	if (!PrepareTargetController(cTermination)) {
 		F710Stop();
 		return FALSE;
@@ -148,7 +155,12 @@ BOOL PrepareTargetController(char cTermination)
 		delete g_Context.pController;
 		g_Context.pController = NULL;
 	}
-	g_Context.pController = new F710Control(cTermination);
+
+	if (g_Context.bRTT4ECMode) {
+		g_Context.pController = new F710TCPControl(&g_Context, cTermination);
+	} else {
+		g_Context.pController = new F710Control(cTermination);
+	}
 
 	//// ‰Šú‰»
 	//if (g_Context.pController == NULL || !g_Context.pController->Initialize(&g_Context, cTermination)) {

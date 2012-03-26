@@ -49,7 +49,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LOGICOOLF710REPEATER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\Miscellaneous;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\Miscellaneous;$(SolutionDir)\..\RTT4ECPlugin\RTT4ECPlugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -67,7 +67,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LOGICOOLF710REPEATER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\Miscellaneous;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\Miscellaneous;$(SolutionDir)\..\RTT4ECPlugin\RTT4ECPlugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -82,12 +82,14 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="F710AbstractControl.h" />
     <ClInclude Include="F710Accessor.h" />
     <ClInclude Include="F710AnalyzeXML.h" />
     <ClInclude Include="F710Control.h" />
     <ClInclude Include="F710Core.h" />
     <ClInclude Include="F710Modules.h" />
     <ClInclude Include="F710ModulesDefs.h" />
+    <ClInclude Include="F710TCPControl.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -100,11 +102,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="F710AbstractControl.cpp" />
     <ClCompile Include="F710Accessor.cpp" />
     <ClCompile Include="F710AnalyzeXML.cpp" />
     <ClCompile Include="F710Control.cpp" />
     <ClCompile Include="F710Core.cpp" />
     <ClCompile Include="F710Modules.cpp" />
+    <ClCompile Include="F710TCPControl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

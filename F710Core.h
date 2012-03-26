@@ -1,6 +1,9 @@
 #pragma once
 
 #include "F710ModulesDefs.h"
+#include <map>
+#include <string>
+class F710AbstractControl;
 
 /* DirectInputÇÃèâä˙âª */
 
@@ -16,10 +19,10 @@ public:
 
 private:
 	BOOL InitializeDirectInput(F710Context* pContext);
-	void InitializeFunctionMap(const F710Context* pContext);
-	LPVOID SearchFunctionByKey(LPCTSTR tempKey);
+	void InitializeFunctionMap(F710Context* pContext);
+	pControlFunc SearchFunctionByKey(LPCTSTR tempKey);
 	void ReadConfigurationFile(F710Context* pContext);
-	BOOL CheckFunctionType(void (*func)(F710Context*), F710Context* pContext, BYTE* flag);
+	BOOL CheckFunctionType(pControlFunc func, F710Context* pContext, BYTE* flag);
 	void KickFunctionByType(F710Context* pContext, BYTE flag);
 
 	void UnInitialize(F710Context* pContext);

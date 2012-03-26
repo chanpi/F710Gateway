@@ -2,12 +2,12 @@
 #include "F710Accessor.h"
 #include "F710AnalyzeXML.h"
 #include "F710Core.h"
+#include "F710AbstractControl.h"
 #include "F710Control.h"
+#include "F710TCPControl.h"
 #include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
 #include <dinput.h>
-#include <map>
-#include <string>
 #include <vector>
 
 using namespace std;
@@ -44,11 +44,10 @@ static LPDIRECTINPUTDEVICE8 g_pDIDev	= NULL;	// DirectInput
 static DIDEVCAPS g_diDevCaps;					// ジョイスティックの能力
 static F710CommandSet g_CommandSet	= {0};
 
-static bool success = false;
+static std::map<std::wstring, pControlFunc> g_FunctionMap; // 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
+
+static BOOL success = FALSE;
 const int STICK_THRESHOLD	= 550;
-
-static map<wstring, LPVOID> g_FunctionMap;		// 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
-
 };
 
 static BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ );
@@ -172,67 +171,67 @@ BOOL F710Core::InitializeDirectInput(F710Context* pContext)
 }
 
 // コマンドとその関数とをマップに格納
-void F710Core::InitializeFunctionMap(const F710Context* pContext)
+void F710Core::InitializeFunctionMap(F710Context* pContext)
 {
-	static bool success = false;
+	static BOOL success = FALSE;
 
 	if (success) {
 		return;
 	}
 
 	// mapは同一キーの場合上書きされる
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_FORWARD, &pContext->pController->GoForward) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_BACKWARD, &pContext->pController->GoBackward) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_UP, &pContext->pController->GoUp) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_DOWN, &pContext->pController->GoDown) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_LEFT, &pContext->pController->GoLeft) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_GO_RIGHT, &pContext->pController->GoRight) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_CAMERA_UP, &pContext->pController->CameraUp) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_CAMERA_DOWN, &pContext->pController->CameraDown) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_CAMERA_LEFT, &pContext->pController->CameraLeft) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_CAMERA_RIGHT, &pContext->pController->CameraRight) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_SPEED_UP, &pContext->pController->ChangeSpeed) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO1, &pContext->pController->PlayMacro1) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO2, &pContext->pController->PlayMacro2) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO3, &pContext->pController->PlayMacro3) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO4, &pContext->pController->PlayMacro4) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO5, &pContext->pController->PlayMacro5) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO6, &pContext->pController->PlayMacro6) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO7, &pContext->pController->PlayMacro7) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO8, &pContext->pController->PlayMacro8) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO9, &pContext->pController->PlayMacro9) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO10, &pContext->pController->PlayMacro10) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO11, &pContext->pController->PlayMacro11) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO12, &pContext->pController->PlayMacro12) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO13, &pContext->pController->PlayMacro13) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO14, &pContext->pController->PlayMacro14) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO15, &pContext->pController->PlayMacro15) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO16, &pContext->pController->PlayMacro16) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO17, &pContext->pController->PlayMacro17) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO18, &pContext->pController->PlayMacro18) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO19, &pContext->pController->PlayMacro19) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO20, &pContext->pController->PlayMacro20) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO21, &pContext->pController->PlayMacro21) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO22, &pContext->pController->PlayMacro22) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO23, &pContext->pController->PlayMacro23) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO24, &pContext->pController->PlayMacro24) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO25, &pContext->pController->PlayMacro25) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO26, &pContext->pController->PlayMacro26) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO27, &pContext->pController->PlayMacro27) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO28, &pContext->pController->PlayMacro28) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO29, &pContext->pController->PlayMacro29) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO30, &pContext->pController->PlayMacro30) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO31, &pContext->pController->PlayMacro31) );
-	g_FunctionMap.insert( map<wstring, LPVOID>::value_type(COMMAND_MACRO32, &pContext->pController->PlayMacro32) );
+	g_FunctionMap[COMMAND_GO_FORWARD] = &F710AbstractControl::GoForward;
+	g_FunctionMap[COMMAND_GO_BACKWARD] = &F710AbstractControl::GoBackward;
+	g_FunctionMap[COMMAND_GO_UP] = &F710AbstractControl::GoUp;
+	g_FunctionMap[COMMAND_GO_DOWN] = &F710AbstractControl::GoDown;
+	g_FunctionMap[COMMAND_GO_LEFT] = &F710AbstractControl::GoLeft;
+	g_FunctionMap[COMMAND_GO_RIGHT] = &F710AbstractControl::GoRight;
+	g_FunctionMap[COMMAND_CAMERA_UP] = &F710AbstractControl::CameraUp;
+	g_FunctionMap[COMMAND_CAMERA_DOWN] = &F710AbstractControl::CameraDown;
+	g_FunctionMap[COMMAND_CAMERA_LEFT] = &F710AbstractControl::CameraLeft;
+	g_FunctionMap[COMMAND_CAMERA_RIGHT] = &F710AbstractControl::CameraRight;
+	g_FunctionMap[COMMAND_SPEED_UP] = &F710AbstractControl::ChangeSpeed;
+	g_FunctionMap[COMMAND_MACRO1] = &F710AbstractControl::PlayMacro1;
+	g_FunctionMap[COMMAND_MACRO2] = &F710AbstractControl::PlayMacro2;
+	g_FunctionMap[COMMAND_MACRO3] = &F710AbstractControl::PlayMacro3;
+	g_FunctionMap[COMMAND_MACRO4] = &F710AbstractControl::PlayMacro4;
+	g_FunctionMap[COMMAND_MACRO5] = &F710AbstractControl::PlayMacro5;
+	g_FunctionMap[COMMAND_MACRO6] = &F710AbstractControl::PlayMacro6;
+	g_FunctionMap[COMMAND_MACRO7] = &F710AbstractControl::PlayMacro7;
+	g_FunctionMap[COMMAND_MACRO8] = &F710AbstractControl::PlayMacro8;
+	g_FunctionMap[COMMAND_MACRO9] = &F710AbstractControl::PlayMacro9;
+	g_FunctionMap[COMMAND_MACRO10] = &F710AbstractControl::PlayMacro10;
+	g_FunctionMap[COMMAND_MACRO11] = &F710AbstractControl::PlayMacro11;
+	g_FunctionMap[COMMAND_MACRO12] = &F710AbstractControl::PlayMacro12;
+	g_FunctionMap[COMMAND_MACRO13] = &F710AbstractControl::PlayMacro13;
+	g_FunctionMap[COMMAND_MACRO14] = &F710AbstractControl::PlayMacro14;
+	g_FunctionMap[COMMAND_MACRO15] = &F710AbstractControl::PlayMacro15;
+	g_FunctionMap[COMMAND_MACRO16] = &F710AbstractControl::PlayMacro16;
+	g_FunctionMap[COMMAND_MACRO17] = &F710AbstractControl::PlayMacro17;
+	g_FunctionMap[COMMAND_MACRO18] = &F710AbstractControl::PlayMacro18;
+	g_FunctionMap[COMMAND_MACRO19] = &F710AbstractControl::PlayMacro19;
+	g_FunctionMap[COMMAND_MACRO20] = &F710AbstractControl::PlayMacro20;
+	g_FunctionMap[COMMAND_MACRO21] = &F710AbstractControl::PlayMacro21;
+	g_FunctionMap[COMMAND_MACRO22] = &F710AbstractControl::PlayMacro22;
+	g_FunctionMap[COMMAND_MACRO23] = &F710AbstractControl::PlayMacro23;
+	g_FunctionMap[COMMAND_MACRO24] = &F710AbstractControl::PlayMacro24;
+	g_FunctionMap[COMMAND_MACRO25] = &F710AbstractControl::PlayMacro25;
+	g_FunctionMap[COMMAND_MACRO26] = &F710AbstractControl::PlayMacro26;
+	g_FunctionMap[COMMAND_MACRO27] = &F710AbstractControl::PlayMacro27;
+	g_FunctionMap[COMMAND_MACRO28] = &F710AbstractControl::PlayMacro28;
+	g_FunctionMap[COMMAND_MACRO29] = &F710AbstractControl::PlayMacro29;
+	g_FunctionMap[COMMAND_MACRO30] = &F710AbstractControl::PlayMacro30;
+	g_FunctionMap[COMMAND_MACRO31] = &F710AbstractControl::PlayMacro31;
+	g_FunctionMap[COMMAND_MACRO32] = &F710AbstractControl::PlayMacro32;
 
 	success = true;
 }
 
-LPVOID F710Core::SearchFunctionByKey(LPCTSTR tempKey)
+pControlFunc F710Core::SearchFunctionByKey(LPCTSTR tempKey)
 {
 	wstring key = (tempKey == NULL) ? _T("") : tempKey;
 	if (!key.empty()) {
-		map<wstring, LPVOID>::iterator it = g_FunctionMap.find(key);
+		map<wstring, pControlFunc>::iterator it = g_FunctionMap.find(key);
 		if (it != g_FunctionMap.end()) {
 			return it->second;
 		}
@@ -327,7 +326,7 @@ void F710Core::CheckInput(F710Context* pContext)
 {
 	DIJOYSTATE2 dijs = {0};
 	HRESULT hr;
-	vector<LPVOID> functionList;
+	vector<pControlFunc> functionList;
 
 	BYTE directionFlag = 0;
 
@@ -498,18 +497,18 @@ void F710Core::CheckInput(F710Context* pContext)
 		}
 
 		if (!functionList.empty()) {
-			vector<LPVOID>::iterator it = functionList.begin();
-			void (*func)(F710Context*) = NULL;
+			vector<pControlFunc>::iterator it = functionList.begin();
+			void (F710AbstractControl::*pFunc)(F710Context*) = NULL;
 			for (; it != functionList.end(); it++) {
-				func = (void (*)(F710Context*))*it;
+				pFunc = *it;
 
 				// 斜め向き対応
-				if (CheckFunctionType(func, pContext, &directionFlag)) {
+				if (CheckFunctionType(pFunc, pContext, &directionFlag)) {
 					continue;
 				}
 
-				if (func != NULL) {
-					(*func)(pContext);
+				if (pFunc != NULL) {
+					(pContext->pController->*pFunc)(pContext);
 				}
 			}
 
@@ -526,24 +525,24 @@ void F710Core::CheckInput(F710Context* pContext)
 	}
 }
 
-BOOL F710Core::CheckFunctionType(void (*func)(F710Context*), F710Context* pContext, BYTE* flag)
+BOOL F710Core::CheckFunctionType(pControlFunc pFunc, F710Context* pContext, BYTE* flag)
 {
 	BOOL ret = TRUE;
-	if (func == pContext->pController->CameraUp) {
+	if (pFunc == &F710AbstractControl::CameraUp) {
 		*flag |= CAMERA_UP_ON;
-	} else if (func == pContext->pController->CameraDown) {
+	} else if (pFunc == &F710AbstractControl::CameraDown) {
 		*flag |= CAMERA_DOWN_ON;
-	} else if (func == pContext->pController->CameraLeft) {
+	} else if (pFunc == &F710AbstractControl::CameraLeft) {
 		*flag |= CAMERA_LEFT_ON;
-	} else if (func == pContext->pController->CameraRight) {
+	} else if (pFunc == &F710AbstractControl::CameraRight) {
 		*flag |= CAMERA_RIGHT_ON;
-	} else if (func == pContext->pController->GoUp) {
+	} else if (pFunc == &F710AbstractControl::GoUp) {
 		*flag |= GO_UP_ON;
-	} else if (func == pContext->pController->GoDown) {
+	} else if (pFunc == &F710AbstractControl::GoDown) {
 		*flag |= GO_DOWN_ON;
-	} else if (func == pContext->pController->GoLeft) {
+	} else if (pFunc == &F710AbstractControl::GoLeft) {
 		*flag |= GO_LEFT_ON;
-	} else if (func == pContext->pController->GoRight) {
+	} else if (pFunc == &F710AbstractControl::GoRight) {
 		*flag |= GO_RIGHT_ON;
 	} else {
 		ret = FALSE;
