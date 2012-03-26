@@ -1,21 +1,21 @@
 ﻿========================================================================
- ダイナミック リンク ライブラリ: I4C3DDInput4LogicoolModules プロジェクトの概要
+ ダイナミック リンク ライブラリ: Logicool4F710Repeater プロジェクトの概要
 ========================================================================
 
-この I4C3DDInput4LogicoolModules DLL は、AppWizard により作成されました。
+この Logicool4F710Repeater DLL は、AppWizard により作成されました。
 
-このファイルには、I4C3DDInput4LogicoolModules 
+このファイルには、Logicool4F710Repeater 
 アプリケーションを構成する各ファイルの内容の概要が含まれています。
 
 
-I4C3DDInput4LogicoolModules.vcxproj
+Logicool4F710Repeater.vcxproj
     これは、アプリケーション ウィザードを使用して生成された VC++ 
     プロジェクトのメイン プロジェクト ファイルです。
     ファイルを生成した Visual C++ のバージョンに関する情報と、アプリケーション 
     ウィザードで選択されたプラットフォーム、
     構成、およびプロジェクト機能に関する情報が含まれています。
 
-I4C3DDInput4LogicoolModules.vcxproj.filters
+Logicool4F710Repeater.vcxproj.filters
     これは、アプリケーション ウィザードで生成された VC++ プロジェクトのフィルター 
     ファイルです。 
     このファイルには、プロジェクト内のファイルとフィルターとの間の関連付けに関する
@@ -24,7 +24,7 @@ I4C3DDInput4LogicoolModules.vcxproj.filters
     示すために IDE で使用されます (たとえば、".cpp" ファイルは "ソース ファイル" 
     フィルターに関連付けられています)。
 
-I4C3DDInput4LogicoolModules.cpp
+Logicool4F710Repeater.cpp
     これは、メインの DLL ソース ファイルです。
 
     この DLL の作成時には、シンボルがエクスポートされません。 このため、ビルド時に 
@@ -39,7 +39,7 @@ I4C3DDInput4LogicoolModules.cpp
 その他の標準ファイル :
 
 StdAfx.h、StdAfx.cpp
-    これらのファイルは、I4C3DDInput4LogicoolModules.pch 
+    これらのファイルは、Logicool4F710Repeater.pch 
     という名前のプリコンパイル済みヘッダー (PCH) ファイルと、StdAfx.obj 
     という名前のプリコンパイル済みの型ファイルを構築するために使用されます。
 

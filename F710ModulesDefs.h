@@ -2,8 +2,8 @@
 
 #include "stdafx.h"
 
-class I4C3DDI4LAnalyzeXML;
-class I4C3DDI4LControl;
+class F710AnalyzeXML;
+class F710Control;
 
 #define MAX_LOADSTRING			100
 #define I4C3D_BUFFER_SIZE		256
@@ -99,7 +99,7 @@ const PCTSTR TRACK_DELTA			= _T("TRACK_DELTA");
 const PCTSTR DOLLY_DELTA			= _T("DOLLY_DELTA");
 const PCTSTR CONTENTS				= _T("CONTENTS");
 
-typedef struct I4C3DDI4LCommandSet {
+typedef struct F710CommandSet {
 	LPVOID BUTTON_X;
 	LPVOID BUTTON_A;
 	LPVOID BUTTON_B;
@@ -142,16 +142,16 @@ typedef struct I4C3DDI4LCommandSet {
 	int speed;
 
 	BYTE buttons[128];
-} I4C3DDI4LCommandSet;
+} F710CommandSet;
 
 typedef struct {
-	I4C3DDI4LAnalyzeXML* pAnalyzer;
-	I4C3DDI4LControl* pController;
+	F710AnalyzeXML* pAnalyzer;
+	F710Control* pController;
 	HINSTANCE hInst;
 	HWND hWnd;
 
 	SOCKET sender;
 	struct sockaddr_in address;
 
-	I4C3DDI4LCommandSet* pCommandSet;
-} I4C3DDI4LContext;
+	F710CommandSet* pCommandSet;
+} F710Context;

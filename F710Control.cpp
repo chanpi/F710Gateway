@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "I4C3DDI4LControl.h"
-#include "I4C3DDI4LModulesDefs.h"
+#include "F710Control.h"
+#include "F710ModulesDefs.h"
 #include <vector>
 #include <math.h>
 
@@ -8,16 +8,16 @@ using namespace std;
 
 const double M_PI = asin(1.0) * 4.0;
 
-static void CreateCommand(char* buffer, int bufferLen, I4C3DDI4LContext* pContext);
+static void CreateCommand(char* buffer, int bufferLen, F710Context* pContext);
 static char g_cTermination = '?';
 
-I4C3DDI4LControl::I4C3DDI4LControl(char cTermination)
+F710Control::F710Control(char cTermination)
 {
 	g_cTermination = cTermination;
 }
 
 
-I4C3DDI4LControl::~I4C3DDI4LControl(void)
+F710Control::~F710Control(void)
 {
 }
 
@@ -34,193 +34,193 @@ I4C3DDI4LControl::~I4C3DDI4LControl(void)
  * 
  * ipodからの電文をTOPMOSTの3Dソフトに転送します。転送はUDPで行います。
  */
-void I4C3DDI4LControl::Execute(I4C3DDI4LContext* pContext, const char* message)
+void F710Control::Execute(F710Context* pContext, const char* message)
 {
 	send(pContext->sender, message, strlen(message), 0);
 }
 
 ///////////////// スピード（移動量）の変更 /////////////////
-void I4C3DDI4LControl::ChangeSpeed(I4C3DDI4LContext* pContext)
+void F710Control::ChangeSpeed(F710Context* pContext)
 {
 	pContext->pCommandSet->speed = 2;
 }
 
-void I4C3DDI4LControl::NormalSpeed(I4C3DDI4LContext* pContext)
+void F710Control::NormalSpeed(F710Context* pContext)
 {
 	pContext->pCommandSet->speed = 1;
 }
 
 ///////////////// MACRO /////////////////
-void I4C3DDI4LControl::PlayMacro(I4C3DDI4LContext* pContext, LPCSTR macroName)
+void F710Control::PlayMacro(F710Context* pContext, LPCSTR macroName)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "%s %c", macroName, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::PlayMacro1(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro1(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO1");
 }
 
-void I4C3DDI4LControl::PlayMacro2(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro2(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO2");
 }
 
-void I4C3DDI4LControl::PlayMacro3(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro3(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO3");
 }
 
-void I4C3DDI4LControl::PlayMacro4(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro4(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO4");
 }
 
-void I4C3DDI4LControl::PlayMacro5(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro5(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO5");
 }
 
-void I4C3DDI4LControl::PlayMacro6(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro6(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO6");
 }
 
-void I4C3DDI4LControl::PlayMacro7(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro7(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO7");
 }
 
-void I4C3DDI4LControl::PlayMacro8(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro8(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO8");
 }
 
-void I4C3DDI4LControl::PlayMacro9(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro9(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO9");
 }
 
-void I4C3DDI4LControl::PlayMacro10(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro10(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO10");
 }
 
-void I4C3DDI4LControl::PlayMacro11(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro11(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO11");
 }
 
-void I4C3DDI4LControl::PlayMacro12(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro12(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO12");
 }
 
-void I4C3DDI4LControl::PlayMacro13(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro13(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO13");
 }
 
-void I4C3DDI4LControl::PlayMacro14(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro14(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO14");
 }
 
-void I4C3DDI4LControl::PlayMacro15(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro15(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO15");
 }
 
-void I4C3DDI4LControl::PlayMacro16(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro16(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO16");
 }
 
-void I4C3DDI4LControl::PlayMacro17(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro17(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO17");
 }
 
-void I4C3DDI4LControl::PlayMacro18(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro18(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO18");
 }
 
-void I4C3DDI4LControl::PlayMacro19(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro19(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO19");
 }
 
-void I4C3DDI4LControl::PlayMacro20(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro20(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO20");
 }
 
-void I4C3DDI4LControl::PlayMacro21(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro21(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO21");
 }
 
-void I4C3DDI4LControl::PlayMacro22(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro22(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO22");
 }
 
-void I4C3DDI4LControl::PlayMacro23(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro23(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO23");
 }
 
-void I4C3DDI4LControl::PlayMacro24(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro24(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO24");
 }
 
-void I4C3DDI4LControl::PlayMacro25(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro25(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO25");
 }
 
-void I4C3DDI4LControl::PlayMacro26(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro26(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO26");
 }
 
-void I4C3DDI4LControl::PlayMacro27(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro27(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO27");
 }
 
-void I4C3DDI4LControl::PlayMacro28(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro28(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO28");
 }
 
-void I4C3DDI4LControl::PlayMacro29(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro29(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO29");
 }
 
-void I4C3DDI4LControl::PlayMacro30(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro30(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO30");
 }
 
-void I4C3DDI4LControl::PlayMacro31(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro31(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO31");
 }
 
-void I4C3DDI4LControl::PlayMacro32(I4C3DDI4LContext* pContext)
+void F710Control::PlayMacro32(F710Context* pContext)
 {
 	PlayMacro(pContext, "MACRO32");
 }
 
 ///////////////// DOLLY(だめならPOSORIENTで) /////////////////
 // 前進（カメラxy）
-void I4C3DDI4LControl::GoForward(I4C3DDI4LContext* pContext)
+void F710Control::GoForward(F710Context* pContext)
 {
 
 	char message[I4C3D_BUFFER_SIZE] = {0};
@@ -229,7 +229,7 @@ void I4C3DDI4LControl::GoForward(I4C3DDI4LContext* pContext)
 }
 
 // 後退（カメラxy）
-void I4C3DDI4LControl::GoBackward(I4C3DDI4LContext* pContext)
+void F710Control::GoBackward(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, -pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, g_cTermination);
@@ -238,35 +238,35 @@ void I4C3DDI4LControl::GoBackward(I4C3DDI4LContext* pContext)
 
 
 ///////////////// TRACK(だめならPOSORIENTで) /////////////////
-void I4C3DDI4LControl::GoUp(I4C3DDI4LContext* pContext)
+void F710Control::GoUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoDown(I4C3DDI4LContext* pContext)
+void F710Control::GoDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoLeft(I4C3DDI4LContext* pContext)
+void F710Control::GoLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c", pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoRight(I4C3DDI4LContext* pContext)
+void F710Control::GoRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c", -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoUpRight(I4C3DDI4LContext* pContext)
+void F710Control::GoUpRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
@@ -276,7 +276,7 @@ void I4C3DDI4LControl::GoUpRight(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoUpLeft(I4C3DDI4LContext* pContext)
+void F710Control::GoUpLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
@@ -286,7 +286,7 @@ void I4C3DDI4LControl::GoUpLeft(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoDownRight(I4C3DDI4LContext* pContext)
+void F710Control::GoDownRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
@@ -296,7 +296,7 @@ void I4C3DDI4LControl::GoDownRight(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::GoDownLeft(I4C3DDI4LContext* pContext)
+void F710Control::GoDownLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TRACK %d %d %c",
@@ -308,35 +308,35 @@ void I4C3DDI4LControl::GoDownLeft(I4C3DDI4LContext* pContext)
 
 
 ///////////////// TUMBLE /////////////////
-void I4C3DDI4LControl::CameraUp(I4C3DDI4LContext* pContext)
+void F710Control::CameraUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraDown(I4C3DDI4LContext* pContext)
+void F710Control::CameraDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraLeft(I4C3DDI4LContext* pContext)
+void F710Control::CameraLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraRight(I4C3DDI4LContext* pContext)
+void F710Control::CameraRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, g_cTermination);
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraUpRight(I4C3DDI4LContext* pContext)
+void F710Control::CameraUpRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
@@ -346,7 +346,7 @@ void I4C3DDI4LControl::CameraUpRight(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraUpLeft(I4C3DDI4LContext* pContext)
+void F710Control::CameraUpLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
@@ -356,7 +356,7 @@ void I4C3DDI4LControl::CameraUpLeft(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraDownRight(I4C3DDI4LContext* pContext)
+void F710Control::CameraDownRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
@@ -366,7 +366,7 @@ void I4C3DDI4LControl::CameraDownRight(I4C3DDI4LContext* pContext)
 	Execute(pContext, message);
 }
 
-void I4C3DDI4LControl::CameraDownLeft(I4C3DDI4LContext* pContext)
+void F710Control::CameraDownLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",

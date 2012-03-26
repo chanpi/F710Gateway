@@ -1,14 +1,14 @@
 #include "StdAfx.h"
-#include "I4C3DDI4LAccessor.h"
-#include "I4C3DDI4LModulesDefs.h"
+#include "F710Accessor.h"
+#include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
 
-I4C3DDI4LAccessor::I4C3DDI4LAccessor(void)
+F710Accessor::F710Accessor(void)
 {
 }
 
 
-I4C3DDI4LAccessor::~I4C3DDI4LAccessor(void)
+F710Accessor::~F710Accessor(void)
 {
 }
 
@@ -36,7 +36,7 @@ I4C3DDI4LAccessor::~I4C3DDI4LAccessor(void)
  * 
  * 受信タイムアウト指定付のTCPソケットを作成します。
  */
-SOCKET I4C3DDI4LAccessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCSTR szAddress, BOOL bSend, USHORT uPort)
+SOCKET F710Accessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCSTR szAddress, BOOL bSend, USHORT uPort)
 {
 	SOCKET socketHandler;
 	TCHAR szError[I4C3D_BUFFER_SIZE];
@@ -59,7 +59,7 @@ SOCKET I4C3DDI4LAccessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCS
 	return socketHandler;
 }
 
-BOOL I4C3DDI4LAccessor::SetConnectingSocket(const SOCKET& socketHandler, const struct sockaddr_in* pAddress) {
+BOOL F710Accessor::SetConnectingSocket(const SOCKET& socketHandler, const struct sockaddr_in* pAddress) {
 	BOOL bUse = TRUE;
 	setsockopt(socketHandler, SOL_SOCKET, SO_REUSEADDR, (const char*)&bUse, sizeof(bUse));
 	int nResult = 0;

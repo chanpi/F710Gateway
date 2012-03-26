@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "I4C3DDI4LAnalyzeXML.h"
-#include "I4C3DDI4LModulesDefs.h"
+#include "F710AnalyzeXML.h"
+#include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
 #include "XMLParser.h"
 #include <vector>
@@ -29,13 +29,13 @@ inline void SafeReleaseMap(map<PCTSTR, PCTSTR>* pMap)
 	}
 }
 
-I4C3DDI4LAnalyzeXML::I4C3DDI4LAnalyzeXML(void)
+F710AnalyzeXML::F710AnalyzeXML(void)
 {
 	g_pConfigPairContainer = new vector<config_pair>;
 }
 
 
-I4C3DDI4LAnalyzeXML::~I4C3DDI4LAnalyzeXML(void)
+F710AnalyzeXML::~F710AnalyzeXML(void)
 {
 	CleanupRootElement();
 	if (g_pConfigPairContainer) {
@@ -90,7 +90,7 @@ void CleanupRootElement(void)
  * 
  * XMLParser.dllを利用し、XMLをロードしオブジェクトにします。
  */
-BOOL I4C3DDI4LAnalyzeXML::LoadXML(PCTSTR szXMLUri)
+BOOL F710AnalyzeXML::LoadXML(PCTSTR szXMLUri)
 {
 	CleanupRootElement();
 	if (!PathFileExists(szXMLUri)) {
@@ -120,7 +120,7 @@ BOOL I4C3DDI4LAnalyzeXML::LoadXML(PCTSTR szXMLUri)
  * @see
  * ReadGlobalTag()
  */
-PCTSTR I4C3DDI4LAnalyzeXML::GetGlobalValue(PCTSTR szKey)
+PCTSTR F710AnalyzeXML::GetGlobalValue(PCTSTR szKey)
 {
 	if (!ReadGlobalTag()) {
 		ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
@@ -145,7 +145,7 @@ PCTSTR I4C3DDI4LAnalyzeXML::GetGlobalValue(PCTSTR szKey)
  * @see
  * ReadGlobalTag() | ReadSoftsTag()
  */
-PCTSTR I4C3DDI4LAnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
+PCTSTR F710AnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
 {
 	//if (!this->ReadGlobalTag()) {
 	//	ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
@@ -184,7 +184,7 @@ PCTSTR I4C3DDI4LAnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
  * @see
  * GetGlobalValue()
  */
-BOOL I4C3DDI4LAnalyzeXML::ReadGlobalTag(void)
+BOOL F710AnalyzeXML::ReadGlobalTag(void)
 {
 	if (g_pGlobalConfig == NULL) {
 		IXMLDOMNode* pGlobal = NULL;
@@ -214,7 +214,7 @@ BOOL I4C3DDI4LAnalyzeXML::ReadGlobalTag(void)
  * @see
  * GetSoftValue()
  */
-BOOL I4C3DDI4LAnalyzeXML::ReadSoftsTag(void)
+BOOL F710AnalyzeXML::ReadSoftsTag(void)
 {
 	if (g_pConfigPairContainer->size() == 0) {
 

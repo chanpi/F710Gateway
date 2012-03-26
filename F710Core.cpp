@@ -1,9 +1,9 @@
 #include "StdAfx.h"
-#include "I4C3DDI4LAccessor.h"
-#include "I4C3DDI4LAnalyzeXML.h"
-#include "I4C3DDI4LCore.h"
-#include "I4C3DDI4LControl.h"
-#include "I4C3DDI4LModulesDefs.h"
+#include "F710Accessor.h"
+#include "F710AnalyzeXML.h"
+#include "F710Core.h"
+#include "F710Control.h"
+#include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
 #include <dinput.h>
 #include <map>
@@ -42,7 +42,7 @@ static void SearchAnimationByKey(LPSTR destination, LPCTSTR key);
 static LPDIRECTINPUT8 g_pDInput			= NULL;	// DirectInput
 static LPDIRECTINPUTDEVICE8 g_pDIDev	= NULL;	// DirectInput
 static DIDEVCAPS g_diDevCaps;					// ÉWÉáÉCÉXÉeÉBÉbÉNÇÃî\óÕ
-static I4C3DDI4LCommandSet g_CommandSet	= {0};
+static F710CommandSet g_CommandSet	= {0};
 
 static bool success = false;
 const int STICK_THRESHOLD	= 550;
@@ -51,19 +51,19 @@ static map<wstring, LPVOID> g_FunctionMap;		// é¿çsÇ∑Ç◊Ç´èàóùÇ∆ÇªÇÃä÷êîÇï€ë∂ÇµÇ
 
 };
 
-static BOOL CALLBACK I4C3DDI4LEnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ );
-static BOOL CALLBACK I4C3DDI4LEnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*pvRef*/ );
+static BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ );
+static BOOL CALLBACK F710EnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*pvRef*/ );
 
-I4C3DDI4LCore::I4C3DDI4LCore(void)
+F710Core::F710Core(void)
 {
 }
 
 
-I4C3DDI4LCore::~I4C3DDI4LCore(void)
+F710Core::~F710Core(void)
 {
 }
 
-BOOL I4C3DDI4LCore::Start(I4C3DDI4LContext* pContext)
+BOOL F710Core::Start(F710Context* pContext)
 {
 	// FunctionMapÇèâä˙âª
 	InitializeFunctionMap(pContext);
@@ -80,10 +80,10 @@ BOOL I4C3DDI4LCore::Start(I4C3DDI4LContext* pContext)
 	USHORT uI4C3DModulePort = 0;
 	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(_T("port")), _T("%hu"), &uI4C3DModulePort);
 
-	I4C3DDI4LAccessor accessor;
+	F710Accessor accessor;
 	pContext->sender = accessor.InitializeTCPSocket((sockaddr_in*)&pContext->address, "127.0.0.1", TRUE, uI4C3DModulePort);
 	if (pContext->sender == INVALID_SOCKET) {
-		LogDebugMessage(Log_Error, _T("InitializeSocket <I4C3DDI4LModules::PrepareTargetController>"));
+		LogDebugMessage(Log_Error, _T("InitializeSocket <F710Modules::PrepareTargetController>"));
 		return FALSE;
 	}
 	if (!accessor.SetConnectingSocket(pContext->sender, &pContext->address)) {
@@ -92,7 +92,7 @@ BOOL I4C3DDI4LCore::Start(I4C3DDI4LContext* pContext)
 	return TRUE;
 }
 
-void I4C3DDI4LCore::Stop(I4C3DDI4LContext* pContext)
+void F710Core::Stop(F710Context* pContext)
 {
 	UnInitialize(pContext);
 }
@@ -107,7 +107,7 @@ void I4C3DDI4LCore::Stop(I4C3DDI4LContext* pContext)
  * I4C3DÉÇÉWÉÖÅ[ÉãÇÃèIóπèàóùÇçsÇ¢Ç‹Ç∑ÅB
  * äeÉCÉxÉìÉgÉIÉuÉWÉFÉNÉgÇÃí‚é~ÅAâï˙ÅAäeÉXÉåÉbÉhÇÃèIóπÇë“ÇøÅAâï˙ÇµÇ‹Ç∑ÅB
  */
-void I4C3DDI4LCore::UnInitialize(I4C3DDI4LContext* pContext)
+void F710Core::UnInitialize(F710Context* pContext)
 {
 	// É\ÉPÉbÉgÉNÉçÅ[ÉY
 	if (pContext->sender != INVALID_SOCKET) {
@@ -116,7 +116,7 @@ void I4C3DDI4LCore::UnInitialize(I4C3DDI4LContext* pContext)
 	}
 }
 
-BOOL I4C3DDI4LCore::InitializeDirectInput(I4C3DDI4LContext* pContext)
+BOOL F710Core::InitializeDirectInput(F710Context* pContext)
 {
 	HRESULT hr;
 
@@ -134,7 +134,7 @@ BOOL I4C3DDI4LCore::InitializeDirectInput(I4C3DDI4LContext* pContext)
 	}
 
 	// ÉfÉoÉCÉXÇóÒãìÇµÇƒçÏê¨
-	hr = g_pDInput->EnumDevices( DI8DEVCLASS_GAMECTRL, I4C3DDI4LEnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY );
+	hr = g_pDInput->EnumDevices( DI8DEVCLASS_GAMECTRL, F710EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY );
 	if ( FAILED( hr ) || g_pDIDev == NULL ) {
 		ReportError(_T("[ERROR] EnumDevices()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumDevices()"));
@@ -158,7 +158,7 @@ BOOL I4C3DDI4LCore::InitializeDirectInput(I4C3DDI4LContext* pContext)
 	}
 
 	// ÉRÅ[ÉãÉoÉbÉNä÷êîÇégÇ¡Çƒäeé≤ÇÃÉÇÅ[ÉhÇê›íË
-	hr = g_pDIDev->EnumObjects( I4C3DDI4LEnumAxesCallback, NULL, DIDFT_AXIS );
+	hr = g_pDIDev->EnumObjects( F710EnumAxesCallback, NULL, DIDFT_AXIS );
 	if ( FAILED( hr ) ) {
 		ReportError(_T("[ERROR] EnumObjects()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumObjects()"));
@@ -172,7 +172,7 @@ BOOL I4C3DDI4LCore::InitializeDirectInput(I4C3DDI4LContext* pContext)
 }
 
 // ÉRÉ}ÉìÉhÇ∆ÇªÇÃä÷êîÇ∆ÇÉ}ÉbÉvÇ…äiî[
-void I4C3DDI4LCore::InitializeFunctionMap(const I4C3DDI4LContext* pContext)
+void F710Core::InitializeFunctionMap(const F710Context* pContext)
 {
 	static bool success = false;
 
@@ -228,7 +228,7 @@ void I4C3DDI4LCore::InitializeFunctionMap(const I4C3DDI4LContext* pContext)
 	success = true;
 }
 
-LPVOID I4C3DDI4LCore::SearchFunctionByKey(LPCTSTR tempKey)
+LPVOID F710Core::SearchFunctionByKey(LPCTSTR tempKey)
 {
 	wstring key = (tempKey == NULL) ? _T("") : tempKey;
 	if (!key.empty()) {
@@ -240,7 +240,7 @@ LPVOID I4C3DDI4LCore::SearchFunctionByKey(LPCTSTR tempKey)
 	return NULL;
 }
 
-void I4C3DDI4LCore::ReadConfigurationFile(I4C3DDI4LContext* pContext)
+void F710Core::ReadConfigurationFile(F710Context* pContext)
 {
 	g_CommandSet.BUTTON_X = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_X));
 	g_CommandSet.BUTTON_A = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_A));
@@ -280,7 +280,7 @@ void I4C3DDI4LCore::ReadConfigurationFile(I4C3DDI4LContext* pContext)
 }
 
 // ÉWÉáÉCÉXÉeÉBÉbÉNÇóÒãìÇ∑ÇÈä÷êî
-BOOL CALLBACK I4C3DDI4LEnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ )
+BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ )
 {
 	HRESULT hr;
 
@@ -302,7 +302,7 @@ BOOL CALLBACK I4C3DDI4LEnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstan
 
 // ÉWÉáÉCÉXÉeÉBÉbÉNÇÃé≤ÇóÒãìÇ∑ÇÈä÷êîÅB
 // ç≈è¨ílÇ-1000Ç…ÅAç≈ëÂílÇ+1000Ç…ê›íËÇ∑ÇÈÅB
-BOOL CALLBACK I4C3DDI4LEnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*pvRef*/ )
+BOOL CALLBACK F710EnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*pvRef*/ )
 {
 	HRESULT hr;
 
@@ -323,7 +323,7 @@ BOOL CALLBACK I4C3DDI4LEnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOI
 }
 
 // Controllerì¸óÕ
-void I4C3DDI4LCore::CheckInput(I4C3DDI4LContext* pContext)
+void F710Core::CheckInput(F710Context* pContext)
 {
 	DIJOYSTATE2 dijs = {0};
 	HRESULT hr;
@@ -499,9 +499,9 @@ void I4C3DDI4LCore::CheckInput(I4C3DDI4LContext* pContext)
 
 		if (!functionList.empty()) {
 			vector<LPVOID>::iterator it = functionList.begin();
-			void (*func)(I4C3DDI4LContext*) = NULL;
+			void (*func)(F710Context*) = NULL;
 			for (; it != functionList.end(); it++) {
-				func = (void (*)(I4C3DDI4LContext*))*it;
+				func = (void (*)(F710Context*))*it;
 
 				// éŒÇﬂå¸Ç´ëŒâû
 				if (CheckFunctionType(func, pContext, &directionFlag)) {
@@ -526,7 +526,7 @@ void I4C3DDI4LCore::CheckInput(I4C3DDI4LContext* pContext)
 	}
 }
 
-BOOL I4C3DDI4LCore::CheckFunctionType(void (*func)(I4C3DDI4LContext*), I4C3DDI4LContext* pContext, BYTE* flag)
+BOOL F710Core::CheckFunctionType(void (*func)(F710Context*), F710Context* pContext, BYTE* flag)
 {
 	BOOL ret = TRUE;
 	if (func == pContext->pController->CameraUp) {
@@ -551,7 +551,7 @@ BOOL I4C3DDI4LCore::CheckFunctionType(void (*func)(I4C3DDI4LContext*), I4C3DDI4L
 	return ret;
 }
 
-void I4C3DDI4LCore::KickFunctionByType(I4C3DDI4LContext* pContext, BYTE flag)
+void F710Core::KickFunctionByType(F710Context* pContext, BYTE flag)
 {
 	switch (flag & CAMERA_MASK) {
 	case CAMERA_UP_ON:

@@ -1,9 +1,9 @@
 #pragma once
-class I4C3DDI4LAnalyzeXML
+class F710AnalyzeXML
 {
 public:
-	I4C3DDI4LAnalyzeXML(void);
-	~I4C3DDI4LAnalyzeXML(void);
+	F710AnalyzeXML(void);
+	~F710AnalyzeXML(void);
 
 	// 引数つきコンストラクタを呼ばない場合は、別途呼び出すことができます。
 	BOOL LoadXML(PCTSTR szXMLUri);
