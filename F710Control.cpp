@@ -7,13 +7,21 @@ using namespace std;
 
 static void CreateCommand(char* buffer, int bufferLen, F710Context* pContext);
 
-F710Control::F710Control(char cTermination)
-	:F710AbstractControl(cTermination)
+F710Control::F710Control(void)
 {
 }
 
 
 F710Control::~F710Control(void)
+{
+}
+
+BOOL F710Control::Initialize(F710Context* pContext, char cTermination)
+{
+	return F710AbstractControl::Initialize(pContext, cTermination);
+}
+
+void F710Control::UnInitialize(void)
 {
 }
 

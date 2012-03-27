@@ -2,14 +2,19 @@
 #include "F710AbstractControl.h"
 
 
-F710AbstractControl::F710AbstractControl(char cTermination)
+F710AbstractControl::F710AbstractControl(void)
 {
-	m_cTermination = cTermination;
 }
 
 
 F710AbstractControl::~F710AbstractControl(void)
 {
+}
+
+BOOL F710AbstractControl::Initialize(F710Context* /*pContext*/, char cTermination)
+{
+	m_cTermination = cTermination;
+	return TRUE;
 }
 
 void F710AbstractControl::Execute(F710Context* pContext, const char* message)

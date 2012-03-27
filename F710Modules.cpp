@@ -7,6 +7,8 @@
 #include "Miscellaneous.h"
 
 static BOOL PrepareTargetController(char cTermination);
+static void DestroyTargetController();
+
 static const PCTSTR TAG_LOG			= _T("log");
 static const PCTSTR TAG_OFF			= _T("off");
 static const PCTSTR TAG_DEBUG		= _T("debug");
@@ -50,7 +52,7 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 	ZeroMemory(&g_Context, sizeof(g_Context));
 	g_Context.hInst = hInst;
 	g_Context.hWnd = hWnd;
-	g_Context.pAnalyzer = new F710AnalyzeXML();
+	g_Context.pAnalyzer = new F710AnalyzeXML;
 	if (g_Context.pAnalyzer == NULL) {
 		ReportError(_T("[ERROR] メモリの確保に失敗しています。初期化は行われません。"));
 		F710Stop();
@@ -62,23 +64,23 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 		return FALSE;
 	}
 
-	//// 設定ファイルからログレベルを取得
-	//LOG_LEVEL logLevel = Log_Error;
-	//PCTSTR szLogLevel = g_Context.pAnalyzer->GetGlobalValue(TAG_LOG);
-	//if (szLogLevel != NULL) {
-	//	if (!_tcsicmp(szLogLevel, TAG_OFF)) {
-	//		logLevel = Log_Off;
-	//	} else if (!_tcsicmp(szLogLevel, TAG_DEBUG)) {
-	//		logLevel = Log_Debug;
-	//	} else if (!_tcsicmp(szLogLevel, TAG_INFO)) {
-	//		logLevel = Log_Info;
-	//	}
-	//	// 指定なし、上記以外ならLog_Error
-	//}
-	//LogFileOpenW("mainmodule", logLevel);
-	//if (logLevel <= Log_Info) {
-	//	LogFileOpenA("mainmoduleinfo", logLevel);	// プロファイル情報書き出しのため
-	//}
+	// 設定ファイルからログレベルを取得
+	LOG_LEVEL logLevel = Log_Error;
+	PCTSTR szLogLevel = g_Context.pAnalyzer->GetGlobalValue(TAG_LOG);
+	if (szLogLevel != NULL) {
+		if (!_tcsicmp(szLogLevel, TAG_OFF)) {
+			logLevel = Log_Off;
+		} else if (!_tcsicmp(szLogLevel, TAG_DEBUG)) {
+			logLevel = Log_Debug;
+		} else if (!_tcsicmp(szLogLevel, TAG_INFO)) {
+			logLevel = Log_Info;
+		}
+		// 指定なし、上記以外ならLog_Error
+	}
+	LogFileOpenW("f710module", logLevel);
+	if (logLevel <= Log_Info) {
+		LogFileOpenA("f710moduleinfo", logLevel);	// プロファイル情報書き出しのため
+	}
 
 	// 設定ファイルから終端文字を取得
 	char cTermination = '?';
@@ -131,11 +133,8 @@ void WINAPI F710Stop(void)
 		delete g_Context.pAnalyzer;
 		g_Context.pAnalyzer = NULL;
 	}
-	if (g_Context.pController != NULL) {
-		delete g_Context.pController;
-		g_Context.pController = NULL;
-	}
-	//DestroyTargetController();
+	DestroyTargetController();
+
 	//g_Context.bIsAlive = FALSE;
 	g_bStarted = FALSE;
 
@@ -152,28 +151,29 @@ void WINAPI F710CheckInput(void)
 BOOL PrepareTargetController(char cTermination)
 {
 	if (g_Context.pController != NULL) {
-		delete g_Context.pController;
-		g_Context.pController = NULL;
+		DestroyTargetController();
 	}
 
 	if (g_Context.bRTT4ECMode) {
-		g_Context.pController = new F710TCPControl(&g_Context, cTermination);
+		g_Context.pController = new F710TCPControl;
 	} else {
-		g_Context.pController = new F710Control(cTermination);
+		g_Context.pController = new F710Control;
 	}
 
-	//// 初期化
-	//if (g_Context.pController == NULL || !g_Context.pController->Initialize(&g_Context, cTermination)) {
-	//	LogDebugMessage(Log_Error, _T("コントローラの初期化に失敗しています。<I4C3DModules::SelectTargetController>"));
-	//	return FALSE;
-	//}
+	// 初期化
+	if (g_Context.pController == NULL || !g_Context.pController->Initialize(&g_Context, cTermination)) {
+		LogDebugMessage(Log_Error, _T("コントローラの初期化に失敗しています。<F710Modules::PrepareTargetController>"));
+		return FALSE;
+	}
 
 	return TRUE;
 }
 
-//void DestroyTargetController()
-//{
-//	if (g_Context.pController != NULL) {
-//		g_Context.pController->UnInitialize();
-//	}
-//}
+void DestroyTargetController()
+{
+	if (g_Context.pController != NULL) {
+		g_Context.pController->UnInitialize();
+		delete g_Context.pController;
+		g_Context.pController = NULL;
+	}
+}

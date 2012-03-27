@@ -5,8 +5,11 @@
 class F710TCPControl : public F710AbstractControl
 {
 public:
-	F710TCPControl(F710Context* pContext, char cTermination);
+	F710TCPControl(void);
 	~F710TCPControl(void);
+
+	BOOL Initialize(F710Context* pContext, char cTermination);
+	void UnInitialize(void);
 
 	void ChangeSpeed(F710Context* pContext);
 	void NormalSpeed(F710Context* pContext);

@@ -7,8 +7,11 @@ const int BUFFER_SIZE = 256;
 class F710AbstractControl
 {
 public:
-	F710AbstractControl(char cTermination);
+	F710AbstractControl();
 	virtual ~F710AbstractControl(void);
+
+	virtual BOOL Initialize(F710Context* pContext, char cTermination);
+	virtual void UnInitialize(void) = 0;
 
 	virtual void ChangeSpeed(F710Context* pContext) = 0;
 	virtual void NormalSpeed(F710Context* pContext) = 0;

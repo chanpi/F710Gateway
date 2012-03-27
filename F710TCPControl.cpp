@@ -15,9 +15,19 @@ namespace {
 	static RTT4ECContext g_rtt4ecContext = {0};
 };
 
-F710TCPControl::F710TCPControl(F710Context* pContext, char cTermination)
-	:F710AbstractControl(cTermination)
+F710TCPControl::F710TCPControl(void)
 {
+}
+
+
+F710TCPControl::~F710TCPControl(void)
+{
+}
+
+BOOL F710TCPControl::Initialize(F710Context* pContext, char cTermination)
+{
+	F710AbstractControl::Initialize(pContext, cTermination);
+
 	// deltaÇì«Ç›çûÇ›
 	g_rtt4ecContext.move = 7;
 	g_rtt4ecContext.angle = 1;
@@ -48,19 +58,21 @@ F710TCPControl::F710TCPControl(F710Context* pContext, char cTermination)
 		g_rtt4ecContext.macroMap[szMacroName] = szMacroValue;
 #endif
 	}
+	return TRUE;
 }
 
-
-F710TCPControl::~F710TCPControl(void)
+void F710TCPControl::UnInitialize(void)
 {
+	g_rtt4ecContext.macroMap.clear();
 }
 
-void F710TCPControl::ChangeSpeed(F710Context* pContext)
+
+void F710TCPControl::ChangeSpeed(F710Context* /*pContext*/)
 {
 	g_rtt4ecContext.speed = 2;
 }
 
-void F710TCPControl::NormalSpeed(F710Context* pContext)
+void F710TCPControl::NormalSpeed(F710Context* /*pContext*/)
 {
 	g_rtt4ecContext.speed = 1;
 }
@@ -348,9 +360,9 @@ void F710TCPControl::CameraDownLeft(F710Context* pContext)
 void F710TCPControl::ExecuteCameraCommand(F710Context* pContext)
 {
 	char message[BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "POSORIENT PHR CAMERA %d %d %d %d %d %d %c",
-		g_rtt4ecContext.x, g_rtt4ecContext.y, g_rtt4ecContext.z,
-		g_rtt4ecContext.p, g_rtt4ecContext.h, g_rtt4ecContext.r, m_cTermination);
+	sprintf_s(message, _countof(message), g_cameraCommandFormat,
+		(float)g_rtt4ecContext.x, (float)g_rtt4ecContext.y, (float)g_rtt4ecContext.z,
+		(float)g_rtt4ecContext.p, (float)g_rtt4ecContext.h, (float)g_rtt4ecContext.r, m_cTermination);
 
 	Execute(pContext, message);
 }

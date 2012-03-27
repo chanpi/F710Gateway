@@ -5,8 +5,11 @@
 class F710Control : public F710AbstractControl
 {
 public:
-	F710Control(char cTermination);
+	F710Control(void);
 	~F710Control(void);
+
+	BOOL Initialize(F710Context* pContext, char cTermination);
+	void UnInitialize(void);
 
 	void ChangeSpeed(F710Context* pContext);
 	void NormalSpeed(F710Context* pContext);
