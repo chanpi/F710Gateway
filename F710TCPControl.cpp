@@ -6,7 +6,7 @@
 #include <math.h>
 
 namespace {
-	const double M_PI = asin(1.0) * 4.0;
+	const float M_PI = 3.14159;
 	const LPCTSTR TAG_RTT4EC		= _T("RTT4EC");
 	const LPCTSTR TAG_MOVE_DELTA	= _T("move_delta");
 	const LPCTSTR TAG_ANGLE_DELTA	= _T("angle_delta");
@@ -40,7 +40,6 @@ BOOL F710TCPControl::Initialize(F710Context* pContext, char cTermination)
 
 	// マクロの読み込み
 	TCHAR szMacroName[16] = {0};
-	TCHAR szTmpCommand[BUFFER_SIZE] = {0};
 	PCTSTR szMacroValue = NULL;
 	for (int j = 1; j <= MAX_MACROS; j++) {
 		_stprintf_s(szMacroName, _countof(szMacroName), _T("MACRO%d"), j);
@@ -241,16 +240,16 @@ void F710TCPControl::PlayMacro32(F710Context* pContext)
 // 前進（カメラxy）
 void F710TCPControl::GoForward(F710Context* pContext)
 {
-	g_rtt4ecContext.x += g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h);
-	g_rtt4ecContext.y -= g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h);
+	g_rtt4ecContext.x += g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.y -= g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI * g_rtt4ecContext.h / 180);
 	ExecuteCameraCommand(pContext);
 }
 
 // 後退（カメラxy）
 void F710TCPControl::GoBackward(F710Context* pContext)
 {
-	g_rtt4ecContext.x -= g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h);
-	g_rtt4ecContext.y += g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h);
+	g_rtt4ecContext.x -= g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.y += g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI * g_rtt4ecContext.h / 180);
 	ExecuteCameraCommand(pContext);
 }
 	
@@ -267,33 +266,27 @@ void F710TCPControl::GoDown(F710Context* pContext)
 	ExecuteCameraCommand(pContext);
 }
 
-void F710TCPControl::GoLeft(F710Context* pContext)
-{
-	//g_rtt4ecContext.x += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
-	//g_rtt4ecContext.y -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
-	//ExecuteCameraCommand(pContext);
-}
-
-void F710TCPControl::GoRight(F710Context* pContext)
-{
-	//g_rtt4ecContext.x -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
-	//g_rtt4ecContext.y += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
-	//ExecuteCameraCommand(pContext);
-}
-
-void F710TCPControl::GoUpRight(F710Context* pContext)
+void F710TCPControl::GoLeft(F710Context* /*pContext*/)
 {
 }
 
-void F710TCPControl::GoUpLeft(F710Context* pContext)
+void F710TCPControl::GoRight(F710Context* /*pContext*/)
 {
 }
 
-void F710TCPControl::GoDownRight(F710Context* pContext)
+void F710TCPControl::GoUpRight(F710Context* /*pContext*/)
 {
 }
 
-void F710TCPControl::GoDownLeft(F710Context* pContext)
+void F710TCPControl::GoUpLeft(F710Context* /*pContext*/)
+{
+}
+
+void F710TCPControl::GoDownRight(F710Context* /*pContext*/)
+{
+}
+
+void F710TCPControl::GoDownLeft(F710Context* /*pContext*/)
 {
 }
 
