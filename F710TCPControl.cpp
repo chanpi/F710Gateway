@@ -241,43 +241,66 @@ void F710TCPControl::PlayMacro32(F710Context* pContext)
 // 前進（カメラxy）
 void F710TCPControl::GoForward(F710Context* pContext)
 {
-	g_rtt4ecContext.x += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
-	g_rtt4ecContext.y -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
+	g_rtt4ecContext.x += g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h);
+	g_rtt4ecContext.y -= g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h);
 	ExecuteCameraCommand(pContext);
 }
 
 // 後退（カメラxy）
 void F710TCPControl::GoBackward(F710Context* pContext)
 {
-	g_rtt4ecContext.x -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
-	g_rtt4ecContext.y += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
+	g_rtt4ecContext.x -= g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h);
+	g_rtt4ecContext.y += g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h);
 	ExecuteCameraCommand(pContext);
 }
 	
 // TRACK
 void F710TCPControl::GoUp(F710Context* pContext)
 {
-	g_rtt4ecContext.z += (int)g_rtt4ecContext.height * g_rtt4ecContext.speed;
+	g_rtt4ecContext.z += g_rtt4ecContext.height * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::GoDown(F710Context* pContext)
 {
-	g_rtt4ecContext.z -= (int)g_rtt4ecContext.height * g_rtt4ecContext.speed;
+	g_rtt4ecContext.z -= g_rtt4ecContext.height * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
-void F710TCPControl::GoLeft(F710Context* pContext) {}
-void F710TCPControl::GoRight(F710Context* pContext) {}
-void F710TCPControl::GoUpRight(F710Context* pContext) {}
-void F710TCPControl::GoUpLeft(F710Context* pContext) {}
-void F710TCPControl::GoDownRight(F710Context* pContext) {}
-void F710TCPControl::GoDownLeft(F710Context* pContext) {}
+void F710TCPControl::GoLeft(F710Context* pContext)
+{
+	//g_rtt4ecContext.x += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
+	//g_rtt4ecContext.y -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
+	//ExecuteCameraCommand(pContext);
+}
+
+void F710TCPControl::GoRight(F710Context* pContext)
+{
+	//g_rtt4ecContext.x -= (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI / 180 * g_rtt4ecContext.h));
+	//g_rtt4ecContext.y += (int)(g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI / 180 * g_rtt4ecContext.h));
+	//ExecuteCameraCommand(pContext);
+}
+
+void F710TCPControl::GoUpRight(F710Context* pContext)
+{
+}
+
+void F710TCPControl::GoUpLeft(F710Context* pContext)
+{
+}
+
+void F710TCPControl::GoDownRight(F710Context* pContext)
+{
+}
+
+void F710TCPControl::GoDownLeft(F710Context* pContext)
+{
+}
 
 // TUMBLE
 void F710TCPControl::CameraUp(F710Context* pContext)
 {
-	g_rtt4ecContext.p -= (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+	g_rtt4ecContext.p -= g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
     //if (g_rtt4ecContext.p < -88)
     //{
     //    g_rtt4ecContext.p = -88;
@@ -288,7 +311,7 @@ void F710TCPControl::CameraUp(F710Context* pContext)
 
 void F710TCPControl::CameraDown(F710Context* pContext)
 {
-	g_rtt4ecContext.p += (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+	g_rtt4ecContext.p += g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
     //if (g_rtt4ecContext.p > 88)
     //{
     //    g_rtt4ecContext.p = 88;
@@ -299,61 +322,61 @@ void F710TCPControl::CameraDown(F710Context* pContext)
 
 void F710TCPControl::CameraLeft(F710Context* pContext)
 {
-	g_rtt4ecContext.h += (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h += g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::CameraRight(F710Context* pContext)
 {
-	g_rtt4ecContext.h -= (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h -= g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::CameraUpRight(F710Context* pContext)
 {
-	g_rtt4ecContext.p += (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
-    //if (g_rtt4ecContext.p > 88)
+	g_rtt4ecContext.p -= g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+    //if (g_rtt4ecContext.p < -88)
     //{
-    //    g_rtt4ecContext.p = 88;
+    //    g_rtt4ecContext.p = -88;
     //    g_rtt4ecContext.r = 0;
     //}
-	g_rtt4ecContext.h -= (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h -= g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::CameraUpLeft(F710Context* pContext)
 {
-	g_rtt4ecContext.p += (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
-    //if (g_rtt4ecContext.p > 88)
+	g_rtt4ecContext.p -= g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+    //if (g_rtt4ecContext.p < -88)
     //{
-    //    g_rtt4ecContext.p = 88;
+    //    g_rtt4ecContext.p = -88;
     //    g_rtt4ecContext.r = 0;
     //}
-	g_rtt4ecContext.h += (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h += g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::CameraDownRight(F710Context* pContext)
 {
-	g_rtt4ecContext.p += (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+	g_rtt4ecContext.p += g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
     //if (g_rtt4ecContext.p > 88)
     //{
     //    g_rtt4ecContext.p = 88;
     //    g_rtt4ecContext.r = 0;
     //}
-	g_rtt4ecContext.h -= (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h -= g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
 void F710TCPControl::CameraDownLeft(F710Context* pContext)
 {
-	g_rtt4ecContext.p += (int)g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
+	g_rtt4ecContext.p += g_rtt4ecContext.pitch * g_rtt4ecContext.speed;
     //if (g_rtt4ecContext.p > 88)
     //{
     //    g_rtt4ecContext.p = 88;
     //    g_rtt4ecContext.r = 0;
     //}
-	g_rtt4ecContext.h += (int)g_rtt4ecContext.angle * g_rtt4ecContext.speed;
+	g_rtt4ecContext.h += g_rtt4ecContext.angle * g_rtt4ecContext.speed;
 	ExecuteCameraCommand(pContext);
 }
 
@@ -361,8 +384,8 @@ void F710TCPControl::ExecuteCameraCommand(F710Context* pContext)
 {
 	char message[BUFFER_SIZE] = {0};
 	sprintf_s(message, _countof(message), g_cameraCommandFormat,
-		(float)g_rtt4ecContext.x, (float)g_rtt4ecContext.y, (float)g_rtt4ecContext.z,
-		(float)g_rtt4ecContext.p, (float)g_rtt4ecContext.h, (float)g_rtt4ecContext.r, m_cTermination);
+		g_rtt4ecContext.x, g_rtt4ecContext.y, g_rtt4ecContext.z,
+		g_rtt4ecContext.p, g_rtt4ecContext.h, g_rtt4ecContext.r, m_cTermination);
 
 	Execute(pContext, message);
 }
