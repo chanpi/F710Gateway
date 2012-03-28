@@ -28,12 +28,12 @@ void F710Control::UnInitialize(void)
 ///////////////// スピード（移動量）の変更 /////////////////
 void F710Control::ChangeSpeed(F710Context* pContext)
 {
-	pContext->pCommandSet->speed = 2;
+	pContext->pCommandSet->speed = pContext->pCommandSet->SHIFT_TRANSMISSION;
 }
 
 void F710Control::NormalSpeed(F710Context* pContext)
 {
-	pContext->pCommandSet->speed = 1;
+	pContext->pCommandSet->speed = 1.;
 }
 
 ///////////////// MACRO /////////////////
@@ -203,7 +203,7 @@ void F710Control::PlayMacro32(F710Context* pContext)
 void F710Control::GoForward(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "DOLLY %f %f %c", 0., pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -211,7 +211,7 @@ void F710Control::GoForward(F710Context* pContext)
 void F710Control::GoBackward(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "DOLLY %d %d %c", 0, -pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "DOLLY %f %f %c", 0., -pContext->pCommandSet->DOLLY_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
@@ -220,35 +220,35 @@ void F710Control::GoBackward(F710Context* pContext)
 void F710Control::GoUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %f %f %c", 0., pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", 0, -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %f %f %c", 0., -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %f %f %c", pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0., m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c", -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
+	sprintf_s(message, _countof(message), "TRACK %f %f %c", -pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed, 0., m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::GoUpRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c",
+	sprintf_s(message, _countof(message), "TRACK %f %f %c",
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -258,7 +258,7 @@ void F710Control::GoUpRight(F710Context* pContext)
 void F710Control::GoUpLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c",
+	sprintf_s(message, _countof(message), "TRACK %f %f %c",
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -268,7 +268,7 @@ void F710Control::GoUpLeft(F710Context* pContext)
 void F710Control::GoDownRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c",
+	sprintf_s(message, _countof(message), "TRACK %f %f %c",
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -278,7 +278,7 @@ void F710Control::GoDownRight(F710Context* pContext)
 void F710Control::GoDownLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TRACK %d %d %c",
+	sprintf_s(message, _countof(message), "TRACK %f %f %c",
 		pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TRACK_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -290,35 +290,35 @@ void F710Control::GoDownLeft(F710Context* pContext)
 void F710Control::CameraUp(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c", 0., -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraDown(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", 0, pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c", 0., pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c", -pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0., m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c", pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0, m_cTermination);
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c", pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed, 0., m_cTermination);
 	Execute(pContext, message);
 }
 
 void F710Control::CameraUpRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c",
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -328,7 +328,7 @@ void F710Control::CameraUpRight(F710Context* pContext)
 void F710Control::CameraUpLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c",
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -338,7 +338,7 @@ void F710Control::CameraUpLeft(F710Context* pContext)
 void F710Control::CameraDownRight(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c",
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);
@@ -348,7 +348,7 @@ void F710Control::CameraDownRight(F710Context* pContext)
 void F710Control::CameraDownLeft(F710Context* pContext)
 {
 	char message[I4C3D_BUFFER_SIZE] = {0};
-	sprintf_s(message, _countof(message), "TUMBLE %d %d %c",
+	sprintf_s(message, _countof(message), "TUMBLE %f %f %c",
 		-pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		pContext->pCommandSet->TUMBLE_DELTA * pContext->pCommandSet->speed,
 		m_cTermination);

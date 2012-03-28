@@ -98,6 +98,7 @@ const PCTSTR TUMBLE_DELTA			= _T("TUMBLE_DELTA");
 const PCTSTR TRACK_DELTA			= _T("TRACK_DELTA");
 const PCTSTR DOLLY_DELTA			= _T("DOLLY_DELTA");
 const PCTSTR CONTENTS				= _T("CONTENTS");
+const PCTSTR SHIFT_TRANSMISSION		= _T("SHIFT_TRANSMISSION");
 
 struct F710Context;
 typedef void (F710AbstractControl::*pControlFunc)(struct F710Context*);
@@ -141,8 +142,9 @@ typedef struct F710CommandSet {
 	int TUMBLE_DELTA;
 	int TRACK_DELTA;
 	int DOLLY_DELTA;
-
-	int speed;
+	
+	float SHIFT_TRANSMISSION;	// •Ï‘¬
+	float speed;
 	BYTE buttons[128];
 } F710CommandSet;
 

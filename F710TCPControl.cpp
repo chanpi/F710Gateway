@@ -3,6 +3,7 @@
 #include "RTT4ECCommon.h"
 #include "I4C3DCommon.h"
 #include "F710AnalyzeXML.h"
+#include "F710ModulesDefs.h"
 #include <math.h>
 
 namespace {
@@ -69,9 +70,9 @@ void F710TCPControl::UnInitialize(void)
 }
 
 
-void F710TCPControl::ChangeSpeed(F710Context* /*pContext*/)
+void F710TCPControl::ChangeSpeed(F710Context* pContext)
 {
-	g_rtt4ecContext.speed = 2;
+	g_rtt4ecContext.speed = pContext->pCommandSet->SHIFT_TRANSMISSION;
 }
 
 void F710TCPControl::NormalSpeed(F710Context* /*pContext*/)

@@ -276,6 +276,8 @@ void F710Core::ReadConfigurationFile(F710Context* pContext)
 	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TUMBLE_DELTA), _T("%d"), &g_CommandSet.TUMBLE_DELTA);
 	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TRACK_DELTA), _T("%d"), &g_CommandSet.TRACK_DELTA);
 	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(DOLLY_DELTA), _T("%d"), &g_CommandSet.DOLLY_DELTA);
+	
+	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(SHIFT_TRANSMISSION), _T("%f"), &g_CommandSet.SHIFT_TRANSMISSION);
 }
 
 // ジョイスティックを列挙する関数
@@ -336,6 +338,8 @@ void F710Core::CheckInput(F710Context* pContext)
 
 	hr = g_pDIDev->GetDeviceState( sizeof( DIJOYSTATE2 ), &dijs );
 	if ( SUCCEEDED( hr ) ) {
+		pContext->pController->NormalSpeed(pContext);
+
 		// Xボタン
 		if (dijs.rgbButtons[0] & 0x80) {
 			OutputDebugString(_T("Key>> X\n"));
@@ -514,7 +518,6 @@ void F710Core::CheckInput(F710Context* pContext)
 
 			// directionFlagをチェックし、カメラコマンドと並行移動コマンドを実行する
 			KickFunctionByType(pContext, directionFlag);
-			pContext->pController->NormalSpeed(pContext);
 		}
 		// 今回のボタンの状態を保存（チャタリング防止のための措置）
 		memcpy_s(g_CommandSet.buttons, sizeof(g_CommandSet.buttons), dijs.rgbButtons, _countof(dijs.rgbButtons));
