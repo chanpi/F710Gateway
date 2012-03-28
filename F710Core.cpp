@@ -65,7 +65,7 @@ F710Core::~F710Core(void)
 BOOL F710Core::Start(F710Context* pContext)
 {
 	// FunctionMapを初期化
-	InitializeFunctionMap(pContext);
+	InitializeFunctionMap();
 	// 設定ファイルを読む
 	ReadConfigurationFile(pContext);
 	// DirectInputの初期化
@@ -171,7 +171,7 @@ BOOL F710Core::InitializeDirectInput(F710Context* pContext)
 }
 
 // コマンドとその関数とをマップに格納
-void F710Core::InitializeFunctionMap(F710Context* pContext)
+void F710Core::InitializeFunctionMap(void)
 {
 	static BOOL success = FALSE;
 
@@ -503,7 +503,7 @@ void F710Core::CheckInput(F710Context* pContext)
 				pFunc = *it;
 
 				// 斜め向き対応
-				if (CheckFunctionType(pFunc, pContext, &directionFlag)) {
+				if (CheckFunctionType(pFunc, &directionFlag)) {
 					continue;
 				}
 
@@ -525,7 +525,7 @@ void F710Core::CheckInput(F710Context* pContext)
 	}
 }
 
-BOOL F710Core::CheckFunctionType(pControlFunc pFunc, F710Context* pContext, BYTE* flag)
+BOOL F710Core::CheckFunctionType(pControlFunc pFunc, BYTE* flag)
 {
 	BOOL ret = TRUE;
 	if (pFunc == &F710AbstractControl::CameraUp) {

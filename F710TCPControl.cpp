@@ -6,12 +6,13 @@
 #include <math.h>
 
 namespace {
-	const float M_PI = 3.14159;
+	const double M_PI = 3.14159;
 	const LPCTSTR TAG_RTT4EC		= _T("RTT4EC");
 	const LPCTSTR TAG_MOVE_DELTA	= _T("move_delta");
 	const LPCTSTR TAG_ANGLE_DELTA	= _T("angle_delta");
 	const LPCTSTR TAG_PITCH_DELTA	= _T("pitch_delta");
 	const LPCTSTR TAG_HEIGHT_DELTA	= _T("height_delta");
+	const LPCTSTR TAG_DEFAULT_HEIGHT= _T("default_height");
 	static RTT4ECContext g_rtt4ecContext = {0};
 };
 
@@ -33,10 +34,12 @@ BOOL F710TCPControl::Initialize(F710Context* pContext, char cTermination)
 	g_rtt4ecContext.angle = 1;
 	g_rtt4ecContext.pitch = 1;
 	g_rtt4ecContext.height = 2;
+	g_rtt4ecContext.z = 15;
 	_stscanf_s(pContext->pAnalyzer->GetSoftValue(TAG_RTT4EC, TAG_MOVE_DELTA), _T("%d"), &g_rtt4ecContext.move);
 	_stscanf_s(pContext->pAnalyzer->GetSoftValue(TAG_RTT4EC, TAG_ANGLE_DELTA), _T("%d"), &g_rtt4ecContext.angle);
 	_stscanf_s(pContext->pAnalyzer->GetSoftValue(TAG_RTT4EC, TAG_PITCH_DELTA), _T("%d"), &g_rtt4ecContext.pitch);
 	_stscanf_s(pContext->pAnalyzer->GetSoftValue(TAG_RTT4EC, TAG_HEIGHT_DELTA), _T("%d"), &g_rtt4ecContext.height);
+	_stscanf_s(pContext->pAnalyzer->GetSoftValue(TAG_RTT4EC, TAG_DEFAULT_HEIGHT), _T("%d"), &g_rtt4ecContext.z);
 
 	// マクロの読み込み
 	TCHAR szMacroName[16] = {0};
@@ -240,16 +243,16 @@ void F710TCPControl::PlayMacro32(F710Context* pContext)
 // 前進（カメラxy）
 void F710TCPControl::GoForward(F710Context* pContext)
 {
-	g_rtt4ecContext.x += g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI * g_rtt4ecContext.h / 180);
-	g_rtt4ecContext.y -= g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.x += g_rtt4ecContext.move * g_rtt4ecContext.speed * (float)sin(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.y -= g_rtt4ecContext.move * g_rtt4ecContext.speed * (float)cos(M_PI * g_rtt4ecContext.h / 180);
 	ExecuteCameraCommand(pContext);
 }
 
 // 後退（カメラxy）
 void F710TCPControl::GoBackward(F710Context* pContext)
 {
-	g_rtt4ecContext.x -= g_rtt4ecContext.move * g_rtt4ecContext.speed * sin(M_PI * g_rtt4ecContext.h / 180);
-	g_rtt4ecContext.y += g_rtt4ecContext.move * g_rtt4ecContext.speed * cos(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.x -= g_rtt4ecContext.move * g_rtt4ecContext.speed * (float)sin(M_PI * g_rtt4ecContext.h / 180);
+	g_rtt4ecContext.y += g_rtt4ecContext.move * g_rtt4ecContext.speed * (float)cos(M_PI * g_rtt4ecContext.h / 180);
 	ExecuteCameraCommand(pContext);
 }
 	

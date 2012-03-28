@@ -19,10 +19,10 @@ public:
 
 private:
 	BOOL InitializeDirectInput(F710Context* pContext);
-	void InitializeFunctionMap(F710Context* pContext);
+	void InitializeFunctionMap(void);
 	pControlFunc SearchFunctionByKey(LPCTSTR tempKey);
 	void ReadConfigurationFile(F710Context* pContext);
-	BOOL CheckFunctionType(pControlFunc func, F710Context* pContext, BYTE* flag);
+	BOOL CheckFunctionType(pControlFunc func, BYTE* flag);
 	void KickFunctionByType(F710Context* pContext, BYTE flag);
 
 	void UnInitialize(F710Context* pContext);
