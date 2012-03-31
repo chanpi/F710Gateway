@@ -4,6 +4,7 @@
 #include "I4C3DCommon.h"
 #include "F710AnalyzeXML.h"
 #include "F710ModulesDefs.h"
+#include "MemoryLeak.h"
 #include <math.h>
 
 namespace {
@@ -82,162 +83,162 @@ void F710TCPControl::NormalSpeed(F710Context* /*pContext*/)
 
 void F710TCPControl::PlayMacro1(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO1"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO1"))].c_str());
 }
 
 void F710TCPControl::PlayMacro2(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO2"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO2"))].c_str());
 }
 
 void F710TCPControl::PlayMacro3(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO3"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO3"))].c_str());
 }
 
 void F710TCPControl::PlayMacro4(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO4"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO4"))].c_str());
 }
 
 void F710TCPControl::PlayMacro5(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO5"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO5"))].c_str());
 }
 
 void F710TCPControl::PlayMacro6(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO6"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO6"))].c_str());
 }
 
 void F710TCPControl::PlayMacro7(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO7"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO7"))].c_str());
 }
 
 void F710TCPControl::PlayMacro8(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO8"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO8"))].c_str());
 }
 
 void F710TCPControl::PlayMacro9(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO9"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO9"))].c_str());
 }
 
 void F710TCPControl::PlayMacro10(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO10"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO10"))].c_str());
 }
 
 void F710TCPControl::PlayMacro11(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO11"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO11"))].c_str());
 }
 
 void F710TCPControl::PlayMacro12(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO12"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO12"))].c_str());
 }
 
 void F710TCPControl::PlayMacro13(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO13"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO13"))].c_str());
 }
 
 void F710TCPControl::PlayMacro14(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO14"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO14"))].c_str());
 }
 
 void F710TCPControl::PlayMacro15(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO15"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO15"))].c_str());
 }
 
 void F710TCPControl::PlayMacro16(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO16"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO16"))].c_str());
 }
 
 void F710TCPControl::PlayMacro17(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO17"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO17"))].c_str());
 }
 
 void F710TCPControl::PlayMacro18(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO18"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO18"))].c_str());
 }
 
 void F710TCPControl::PlayMacro19(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO19"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO19"))].c_str());
 }
 
 void F710TCPControl::PlayMacro20(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO20"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO20"))].c_str());
 }
 
 void F710TCPControl::PlayMacro21(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO21"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO21"))].c_str());
 }
 
 void F710TCPControl::PlayMacro22(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO22"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO22"))].c_str());
 }
 
 void F710TCPControl::PlayMacro23(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO23"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO23"))].c_str());
 }
 
 void F710TCPControl::PlayMacro24(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO24"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO24"))].c_str());
 }
 
 void F710TCPControl::PlayMacro25(F710Context* pContext) 
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO25"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO25"))].c_str());
 }
 
 void F710TCPControl::PlayMacro26(F710Context* pContext) 
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO26"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO26"))].c_str());
 }
 
 void F710TCPControl::PlayMacro27(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO27"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO27"))].c_str());
 }
 
 void F710TCPControl::PlayMacro28(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO28"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO28"))].c_str());
 }
 
 void F710TCPControl::PlayMacro29(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO29"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO29"))].c_str());
 }
 
 void F710TCPControl::PlayMacro30(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO30"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO30"))].c_str());
 }
 
 void F710TCPControl::PlayMacro31(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO31"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO31"))].c_str());
 }
 
 void F710TCPControl::PlayMacro32(F710Context* pContext)
 {
-	PlayMacro(pContext, g_rtt4ecContext.macroMap[wstring(_T("MACRO32"))].c_str());
+	PlayMacro(pContext, g_rtt4ecContext.macroMap[tstring(_T("MACRO32"))].c_str());
 }
 
 // DOLLY

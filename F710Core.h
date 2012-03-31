@@ -1,9 +1,6 @@
 #pragma once
 
 #include "F710ModulesDefs.h"
-#include <map>
-#include <string>
-class F710AbstractControl;
 
 /* DirectInputÇÃèâä˙âª */
 
@@ -26,5 +23,6 @@ private:
 	void KickFunctionByType(F710Context* pContext, BYTE flag);
 
 	void UnInitialize(F710Context* pContext);
+	void UnInitializeDirectInput(F710Context* pContext);
 };
 

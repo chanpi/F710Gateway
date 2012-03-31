@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "F710AbstractControl.h"
-
+#include "MemoryLeak.h"
 
 F710AbstractControl::F710AbstractControl(void)
 {

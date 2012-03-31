@@ -5,6 +5,8 @@
 #include "F710Control.h"
 #include "F710TCPControl.h"
 #include "Miscellaneous.h"
+#include "MemoryLeak.h"
+#include "ErrorCodeList.h"
 
 static BOOL PrepareTargetController(char cTermination);
 static void DestroyTargetController();
@@ -42,7 +44,7 @@ static BOOL g_bStarted = FALSE;
  * @see
  * I4C3DStop()
  */
-BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
+BOOL F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 {
 	if (g_bStarted) {
 		return TRUE;
@@ -56,12 +58,12 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 	if (g_Context.pAnalyzer == NULL) {
 		ReportError(_T("[ERROR] メモリの確保に失敗しています。初期化は行われません。"));
 		F710Stop();
-		return FALSE;
+		exit(EXIT_SYSTEM_ERROR);
 	}
 	if (!g_Context.pAnalyzer->LoadXML(szXMLUri)) {
 		ReportError(_T("[ERROR] XMLのロードに失敗しています。初期化は行われません。"));
 		F710Stop();
-		return FALSE;
+		exit(EXIT_INVALID_FILE_CONFIGURATION);
 	}
 
 	// 設定ファイルからログレベルを取得
@@ -77,9 +79,9 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 		}
 		// 指定なし、上記以外ならLog_Error
 	}
-	LogFileOpenW("f710module", logLevel);
+	LogFileOpenW("F710Gateway", logLevel);
 	if (logLevel <= Log_Info) {
-		LogFileOpenA("f710moduleinfo", logLevel);	// プロファイル情報書き出しのため
+		LogFileOpenA("F710Gatewayinfo", logLevel);	// プロファイル情報書き出しのため
 	}
 
 	// 設定ファイルから終端文字を取得
@@ -103,7 +105,7 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 	g_Context.bRTT4ECMode = (_tcsicmp(g_Context.pAnalyzer->GetGlobalValue(TAG_RTT4TCPMODE), _T("on")) == 0);
 	if (!PrepareTargetController(cTermination)) {
 		F710Stop();
-		return FALSE;
+		exit(EXIT_SYSTEM_ERROR);
 	}
 
 	g_bStarted = g_Core.Start(&g_Context);
@@ -126,7 +128,7 @@ BOOL WINAPI F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
  * @see
  * I4C3DStart()
  */
-void WINAPI F710Stop(void)
+void F710Stop(void)
 {
 	g_Core.Stop(&g_Context);
 	if (g_Context.pAnalyzer != NULL) {
@@ -143,7 +145,7 @@ void WINAPI F710Stop(void)
 }
 
 // 入力チェック
-void WINAPI F710CheckInput(void)
+void F710CheckInput(void)
 {
 	g_Core.CheckInput(&g_Context);
 }

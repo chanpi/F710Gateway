@@ -7,8 +7,11 @@
 #include "F710TCPControl.h"
 #include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
+#include "MemoryLeak.h"
+#include "ErrorCodeList.h"
 #include <dinput.h>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -41,13 +44,13 @@ static void SearchAnimationByKey(LPSTR destination, LPCTSTR key);
 
 static LPDIRECTINPUT8 g_pDInput			= NULL;	// DirectInput
 static LPDIRECTINPUTDEVICE8 g_pDIDev	= NULL;	// DirectInput
-static DIDEVCAPS g_diDevCaps;					// ジョイスティックの能力
-static F710CommandSet g_CommandSet	= {0};
+static DIDEVCAPS g_diDevCaps			= {0};	// ジョイスティックの能力
+static F710CommandSet g_CommandSet		= {0};
 
-static std::map<std::wstring, pControlFunc> g_FunctionMap; // 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
+static map<tstring, pControlFunc> g_FunctionMap; // 実行すべき処理とその関数を保存します(例：CAMERA_UP:CameraUp関数へのポインタ)
 
-static BOOL success = FALSE;
 const int STICK_THRESHOLD	= 550;
+static PCTSTR g_szSoftwareName = _T("F710Gateway");
 };
 
 static BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ );
@@ -80,13 +83,17 @@ BOOL F710Core::Start(F710Context* pContext)
 	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(_T("port")), _T("%hu"), &uI4C3DModulePort);
 
 	F710Accessor accessor;
+
+	// 接続の前に２秒程度待つ(I4C3DModulesが先に起動するのを確実に待つため)
+	Sleep(2000);
+
 	pContext->sender = accessor.InitializeTCPSocket((sockaddr_in*)&pContext->address, "127.0.0.1", TRUE, uI4C3DModulePort);
 	if (pContext->sender == INVALID_SOCKET) {
 		LogDebugMessage(Log_Error, _T("InitializeSocket <F710Modules::PrepareTargetController>"));
-		return FALSE;
+		exit(EXIT_SOCKET_ERROR);
 	}
 	if (!accessor.SetConnectingSocket(pContext->sender, &pContext->address)) {
-		return FALSE;
+		exit(EXIT_SOCKET_CONNECT_ERROR);
 	}
 	return TRUE;
 }
@@ -94,6 +101,7 @@ BOOL F710Core::Start(F710Context* pContext)
 void F710Core::Stop(F710Context* pContext)
 {
 	UnInitialize(pContext);
+	UnInitializeDirectInput(pContext);
 }
 
 /**
@@ -113,72 +121,73 @@ void F710Core::UnInitialize(F710Context* pContext)
 		closesocket(pContext->sender);
 		pContext->sender = INVALID_SOCKET;
 	}
+	g_FunctionMap.clear();
 }
 
 BOOL F710Core::InitializeDirectInput(F710Context* pContext)
 {
 	HRESULT hr;
 
-	if (success) {
-		return TRUE;
-	}
-
 	// DirectInputの作成
 	hr = DirectInput8Create( pContext->hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&g_pDInput, NULL );
 	
 	if ( FAILED( hr ) ) {
-		ReportError(_T("[ERROR] DirectInput8Create()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] DirectInput8Create()"));
-		return FALSE;
+		UnInitializeDirectInput(pContext);
+		exit(EXIT_GAMEPAD_SETUP_ERROR);
 	}
 
 	// デバイスを列挙して作成
 	hr = g_pDInput->EnumDevices( DI8DEVCLASS_GAMECTRL, F710EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY );
 	if ( FAILED( hr ) || g_pDIDev == NULL ) {
-		ReportError(_T("[ERROR] EnumDevices()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumDevices()"));
-		return FALSE;
+		UnInitializeDirectInput(pContext);
+		exit(EXIT_GAMEPAD_NOT_FOUND);
 	}
 
 	// データ形式を設定
 	hr = g_pDIDev->SetDataFormat( &c_dfDIJoystick2 );
 	if ( FAILED( hr ) ) {
-		ReportError(_T("[ERROR] SetDataFormat()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] SetDataFormat()"));
-		return FALSE;
+		UnInitializeDirectInput(pContext);
+		exit(EXIT_GAMEPAD_SETUP_ERROR);
 	}
 
 	// 協調モードを設定（バックグラウンド＆非排他モード）
 	hr = g_pDIDev->SetCooperativeLevel( pContext->hWnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND );
 	if ( FAILED( hr ) ) {
-		ReportError(_T("[ERROR] SetCooperativeLevel()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] SetCooperativeLevel()"));
-		return FALSE;
+		UnInitializeDirectInput(pContext);
+		exit(EXIT_GAMEPAD_SETUP_ERROR);
 	}
 
 	// コールバック関数を使って各軸のモードを設定
 	hr = g_pDIDev->EnumObjects( F710EnumAxesCallback, NULL, DIDFT_AXIS );
 	if ( FAILED( hr ) ) {
-		ReportError(_T("[ERROR] EnumObjects()"));
 		LogDebugMessage(Log_Error, _T("[ERROR] EnumObjects()"));
-		return FALSE;
+		UnInitializeDirectInput(pContext);
+		exit(EXIT_GAMEPAD_SETUP_ERROR);
 	}
 	// 入力制御開始
 	g_pDIDev->Acquire();
 
-	success = true;
 	return TRUE;
+}
+
+void F710Core::UnInitializeDirectInput(F710Context* /*pContext*/)
+{
+	if (g_pDIDev) {
+		g_pDIDev->Unacquire();
+	}
+	// デバイスを解放する
+	SAFE_RELEASE(g_pDIDev);
+	// DirectInputの解放
+	SAFE_RELEASE(g_pDInput);
 }
 
 // コマンドとその関数とをマップに格納
 void F710Core::InitializeFunctionMap(void)
 {
-	static BOOL success = FALSE;
-
-	if (success) {
-		return;
-	}
-
 	// mapは同一キーの場合上書きされる
 	g_FunctionMap[COMMAND_GO_FORWARD] = &F710AbstractControl::GoForward;
 	g_FunctionMap[COMMAND_GO_BACKWARD] = &F710AbstractControl::GoBackward;
@@ -223,15 +232,13 @@ void F710Core::InitializeFunctionMap(void)
 	g_FunctionMap[COMMAND_MACRO30] = &F710AbstractControl::PlayMacro30;
 	g_FunctionMap[COMMAND_MACRO31] = &F710AbstractControl::PlayMacro31;
 	g_FunctionMap[COMMAND_MACRO32] = &F710AbstractControl::PlayMacro32;
-
-	success = true;
 }
 
 pControlFunc F710Core::SearchFunctionByKey(LPCTSTR tempKey)
 {
-	wstring key = (tempKey == NULL) ? _T("") : tempKey;
+	tstring key = (tempKey == NULL) ? _T("") : tempKey;
 	if (!key.empty()) {
-		map<wstring, pControlFunc>::iterator it = g_FunctionMap.find(key);
+		map<tstring, pControlFunc>::iterator it = g_FunctionMap.find(key);
 		if (it != g_FunctionMap.end()) {
 			return it->second;
 		}
@@ -241,43 +248,43 @@ pControlFunc F710Core::SearchFunctionByKey(LPCTSTR tempKey)
 
 void F710Core::ReadConfigurationFile(F710Context* pContext)
 {
-	g_CommandSet.BUTTON_X = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_X));
-	g_CommandSet.BUTTON_A = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_A));
-	g_CommandSet.BUTTON_B = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_B));
-	g_CommandSet.BUTTON_Y = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_Y));
-	g_CommandSet.BUTTON_LB = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_LB));
-	g_CommandSet.BUTTON_LT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_LT));
-	g_CommandSet.BUTTON_RB = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_RB));
-	g_CommandSet.BUTTON_RT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_RT));
-	g_CommandSet.BUTTON_BACK = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_BACK));
-	g_CommandSet.BUTTON_START = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_START));
-	g_CommandSet.BUTTON_LEFTSTICK = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_LEFTSTICK));
-	g_CommandSet.BUTTON_RIGHTSTICK = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_RIGHTSTICK));
+	g_CommandSet.BUTTON_X = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_X));
+	g_CommandSet.BUTTON_A = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_A));
+	g_CommandSet.BUTTON_B = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_B));
+	g_CommandSet.BUTTON_Y = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_Y));
+	g_CommandSet.BUTTON_LB = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_LB));
+	g_CommandSet.BUTTON_LT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_LT));
+	g_CommandSet.BUTTON_RB = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_RB));
+	g_CommandSet.BUTTON_RT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_RT));
+	g_CommandSet.BUTTON_BACK = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_BACK));
+	g_CommandSet.BUTTON_START = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_START));
+	g_CommandSet.BUTTON_LEFTSTICK = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_LEFTSTICK));
+	g_CommandSet.BUTTON_RIGHTSTICK = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_RIGHTSTICK));
 
 	// 十字キー
-	g_CommandSet.BUTTON_UP = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_UP));
-	g_CommandSet.BUTTON_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_DOWN));
-	g_CommandSet.BUTTON_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_LEFT));
-	g_CommandSet.BUTTON_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_RIGHT));
-	g_CommandSet.BUTTON_UPRIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_UPRIGHT));
-	g_CommandSet.BUTTON_UPLEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_UPLEFT));
-	g_CommandSet.BUTTON_DOWNRIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_DOWNRIGHT));
-	g_CommandSet.BUTTON_DOWNLEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(BUTTON_DOWNLEFT));
+	g_CommandSet.BUTTON_UP = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_UP));
+	g_CommandSet.BUTTON_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_DOWN));
+	g_CommandSet.BUTTON_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_LEFT));
+	g_CommandSet.BUTTON_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_RIGHT));
+	g_CommandSet.BUTTON_UPRIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_UPRIGHT));
+	g_CommandSet.BUTTON_UPLEFT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_UPLEFT));
+	g_CommandSet.BUTTON_DOWNRIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_DOWNRIGHT));
+	g_CommandSet.BUTTON_DOWNLEFT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, BUTTON_DOWNLEFT));
 
-	g_CommandSet.STICK_L_UP = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_L_UP));
-	g_CommandSet.STICK_L_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_L_DOWN));
-	g_CommandSet.STICK_L_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_L_LEFT));
-	g_CommandSet.STICK_L_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_L_RIGHT));
-	g_CommandSet.STICK_R_UP = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_R_UP));
-	g_CommandSet.STICK_R_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_R_DOWN));
-	g_CommandSet.STICK_R_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_R_LEFT));
-	g_CommandSet.STICK_R_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetGlobalValue(STICK_R_RIGHT));
+	g_CommandSet.STICK_L_UP = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_L_UP));
+	g_CommandSet.STICK_L_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_L_DOWN));
+	g_CommandSet.STICK_L_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_L_LEFT));
+	g_CommandSet.STICK_L_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_L_RIGHT));
+	g_CommandSet.STICK_R_UP = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_R_UP));
+	g_CommandSet.STICK_R_DOWN = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_R_DOWN));
+	g_CommandSet.STICK_R_LEFT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_R_LEFT));
+	g_CommandSet.STICK_R_RIGHT = SearchFunctionByKey(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, STICK_R_RIGHT));
 
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TUMBLE_DELTA), _T("%d"), &g_CommandSet.TUMBLE_DELTA);
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(TRACK_DELTA), _T("%d"), &g_CommandSet.TRACK_DELTA);
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(DOLLY_DELTA), _T("%d"), &g_CommandSet.DOLLY_DELTA);
+	_stscanf_s(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, TUMBLE_DELTA), _T("%d"), &g_CommandSet.TUMBLE_DELTA);
+	_stscanf_s(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, TRACK_DELTA), _T("%d"), &g_CommandSet.TRACK_DELTA);
+	_stscanf_s(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, DOLLY_DELTA), _T("%d"), &g_CommandSet.DOLLY_DELTA);
 	
-	_stscanf_s(pContext->pAnalyzer->GetGlobalValue(SHIFT_TRANSMISSION), _T("%f"), &g_CommandSet.SHIFT_TRANSMISSION);
+	_stscanf_s(pContext->pAnalyzer->GetSoftValue(g_szSoftwareName, SHIFT_TRANSMISSION), _T("%f"), &g_CommandSet.SHIFT_TRANSMISSION);
 }
 
 // ジョイスティックを列挙する関数
@@ -332,7 +339,7 @@ void F710Core::CheckInput(F710Context* pContext)
 
 	BYTE directionFlag = 0;
 
-	if (!success) {
+	if (g_pDIDev == NULL) {
 		return;
 	}
 

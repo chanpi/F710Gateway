@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "F710Control.h"
 #include "F710ModulesDefs.h"
+#include "MemoryLeak.h"
 #include <vector>
 
 using namespace std;

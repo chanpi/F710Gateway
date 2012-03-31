@@ -2,6 +2,7 @@
 #include "F710Accessor.h"
 #include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
+#include "MemoryLeak.h"
 
 F710Accessor::F710Accessor(void)
 {
@@ -44,7 +45,6 @@ SOCKET F710Accessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCSTR sz
 	socketHandler = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (socketHandler == INVALID_SOCKET) {
 		_stprintf_s(szError, _countof(szError), _T("[ERROR] socket() : %d"), WSAGetLastError());
-		ReportError(szError);
 		LogDebugMessage(Log_Error, szError);
 		return socketHandler;
 	}
@@ -69,7 +69,6 @@ BOOL F710Accessor::SetConnectingSocket(const SOCKET& socketHandler, const struct
 	nResult = connect(socketHandler, (const sockaddr*)pAddress, sizeof(*pAddress));
 	if (nResult == SOCKET_ERROR) {
 		_stprintf_s(szError, _countof(szError), _T("[ERROR] connect() : %d"), WSAGetLastError());
-		ReportError(szError);
 		LogDebugMessage(Log_Error, szError);
 		closesocket(socketHandler);
 		return FALSE;

@@ -3,6 +3,7 @@
 #include "F710ModulesDefs.h"
 #include "Miscellaneous.h"
 #include "XMLParser.h"
+#include "MemoryLeak.h"
 #include <vector>
 #include <map>
 using namespace std;
@@ -123,7 +124,7 @@ BOOL F710AnalyzeXML::LoadXML(PCTSTR szXMLUri)
 PCTSTR F710AnalyzeXML::GetGlobalValue(PCTSTR szKey)
 {
 	if (!ReadGlobalTag()) {
-		ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
+		LogDebugMessage(Log_Error, _T("[ERROR] globalタグの読み込みに失敗しています。"));
 		return NULL;
 	}
 
@@ -147,12 +148,8 @@ PCTSTR F710AnalyzeXML::GetGlobalValue(PCTSTR szKey)
  */
 PCTSTR F710AnalyzeXML::GetSoftValue(PCTSTR szSoftName, PCTSTR szKey)
 {
-	//if (!this->ReadGlobalTag()) {
-	//	ReportError(_T("[ERROR] globalタグの読み込みに失敗しています。"));
-	//	return NULL;
-	//}
 	if (!this->ReadSoftsTag()) {
-		ReportError(_T("[ERROR] softsタグの読み込みに失敗しています。"));
+		LogDebugMessage(Log_Error, _T("[ERROR] softsタグの読み込みに失敗しています。"));
 		return NULL;
 	}
 
