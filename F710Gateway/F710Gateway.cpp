@@ -7,6 +7,7 @@
 #include "MemoryLeak.h"
 #include "Misc.h"
 #include "SharedConstants.h"
+#include "CertificateManager.h"
 #include <ShellAPI.h>
 
 #include <cstdlib>	// 必要
@@ -73,20 +74,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	int argc = 0;
 	LPTSTR *argv = NULL;
 	argv = CommandLineToArgvW(GetCommandLine(), &argc);
-	if (argc < 4) {	// 最後の引数はランチャーからもらう"-run"
-		// [例: F710Gateway.exe [LogicoolF710の入力チェックインターバル(msec)] [設定ファイル名]]
+	if (argc < 5) {	// 最後の引数はランチャーからもらう"-run"
+		// [例: F710Gateway.exe Hamster.lic [LogicoolF710の入力チェックインターバル(msec)] [設定ファイル名] -run]
 		MessageBox(NULL, _T(MESSAGE_ERROR_PLUGIN_ARGUMENT), szTitle, MB_OK | MB_ICONERROR);
 		LocalFree(argv);
 		return EXIT_NO_ARGUMENTS;
 	}
-	if (0 != _tcsicmp(argv[3], g_szExecutableOption)) {
-		LoggingMessage(Log_Error, _T(MESSAGE_ERROR_PLUGIN_OPTION), GetLastError(), g_FILE, __LINE__);
+
+	// ライセンスファイル名取得
+	int result = CheckLicense(argv[1]);
+	if (result != EXIT_SUCCESS) {
+		LocalFree(argv);
+		return result;
+	}
+
+	if (0 != _tcsicmp(argv[4], g_szExecutableOption)) {
+		//LoggingMessage(Log_Error, _T(MESSAGE_ERROR_PLUGIN_OPTION), GetLastError(), g_FILE, __LINE__);
 		LocalFree(argv);
 		return EXIT_NOT_EXECUTABLE;
 	}
 
-	g_timerInterval = static_cast<int>(_wtoi(argv[1]));
-	_tcscpy_s(g_szConfigFile, _countof(g_szConfigFile), argv[2]);
+	g_timerInterval = static_cast<int>(_wtoi(argv[2]));
+	_tcscpy_s(g_szConfigFile, _countof(g_szConfigFile), argv[3]);
 	LocalFree(argv);
 
 	static WSAData wsaData;
