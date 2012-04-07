@@ -39,11 +39,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>hm_wheel_f710</TargetName>
+    <TargetName>hm_gateway_f710</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>hm_wheel_f710</TargetName>
+    <TargetName>hm_gateway_f710</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -52,6 +52,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\RTTECPlugin\RTTECPlugin;$(SolutionDir)\..\Misc;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\I4C3DLauncher\I4C3DLauncher;$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\CertificateManager\CertificateManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -69,6 +70,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\RTTECPlugin\RTTECPlugin;$(SolutionDir)\..\Misc;$(SolutionDir)\..\I4C3DDriver\I4C3DDriver;$(SolutionDir)\..\I4C3DLauncher\I4C3DLauncher;$(SolutionDir)\..\XMLParser\XMLParser;$(SolutionDir)\..\CertificateManager\CertificateManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
