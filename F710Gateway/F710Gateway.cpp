@@ -98,9 +98,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	_tcscpy_s(g_szConfigFile, _countof(g_szConfigFile), argv[3]);
 	LocalFree(argv);
 
-	static WSAData wsaData;
-	WORD wVersion;
-	int nResult;
+	static WSAData wsaData = {0};
+	WORD wVersion = 0;
+	int nResult = 0;
 
 	wVersion = MAKEWORD(2,2);
 	nResult = WSAStartup(wVersion, &wsaData);
@@ -219,7 +219,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	TCHAR szFileName[MAX_PATH] = {0};
 	static NOTIFYICONDATA nIcon = {0};
-	static int sw = 1;
 
 	switch (message)
 	{

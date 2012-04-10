@@ -2,7 +2,8 @@
 #include "F710AbstractControl.h"
 #include "MemoryLeak.h"
 
-F710AbstractControl::F710AbstractControl(void)
+F710AbstractControl::F710AbstractControl(void):
+m_cTermination(NULL)
 {
 }
 

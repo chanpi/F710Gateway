@@ -1,4 +1,7 @@
 #include "StdAfx.h"
+
+#define DIRECTINPUT_VERSION  0x0800
+
 #include "F710Accessor.h"
 #include "F710AnalyzeXML.h"
 #include "F710Core.h"
@@ -135,7 +138,7 @@ void F710Core::UnInitialize(F710Context* pContext)
 
 BOOL F710Core::InitializeDirectInput(F710Context* pContext)
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// DirectInputの作成
 	hr = DirectInput8Create( pContext->hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&g_pDInput, NULL );
@@ -304,7 +307,7 @@ void F710Core::ReadConfigurationFile(F710Context* pContext)
 // ジョイスティックを列挙する関数
 BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* /*pContext*/ )
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// 列挙されたジョイスティックへのインターフェイスを取得する
 	hr = g_pDInput->CreateDevice( pdidInstance->guidInstance, &g_pDIDev, NULL );
@@ -326,7 +329,7 @@ BOOL CALLBACK F710EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, V
 // 最小値を-1000に、最大値を+1000に設定する。
 BOOL CALLBACK F710EnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*pvRef*/ )
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// 軸の値の範囲を設定（-1000 - 1000）
 	DIPROPRANGE diprg;
@@ -348,7 +351,7 @@ BOOL CALLBACK F710EnumAxesCallback( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID /*p
 void F710Core::CheckInput(F710Context* pContext)
 {
 	DIJOYSTATE2 dijs = {0};
-	HRESULT hr;
+	HRESULT hr = S_OK;
 	vector<pControlFunc> functionList;
 
 	BYTE directionFlag = 0;
@@ -524,7 +527,7 @@ void F710Core::CheckInput(F710Context* pContext)
 		if (!functionList.empty()) {
 			vector<pControlFunc>::iterator it = functionList.begin();
 			void (F710AbstractControl::*pFunc)(F710Context*) = NULL;
-			for (; it != functionList.end(); it++) {
+			for (; it != functionList.end(); ++it) {
 				pFunc = *it;
 
 				// 斜め向き対応

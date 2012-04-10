@@ -46,7 +46,7 @@ F710Accessor::~F710Accessor(void)
  */
 SOCKET F710Accessor::InitializeTCPSocket(struct sockaddr_in* pAddress, LPCSTR szAddress, BOOL bSend, USHORT uPort)
 {
-	SOCKET socketHandler;
+	SOCKET socketHandler = INVALID_SOCKET;
 
 	socketHandler = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (socketHandler == INVALID_SOCKET) {

@@ -8,7 +8,7 @@
 #include <math.h>
 
 namespace {
-	const float M_PI = 3.14159;
+	const float M_PI = (float)3.14159;
 	const LPCTSTR TAG_RTTEC			= _T("RTTEC");
 	const LPCTSTR TAG_MOVE_DELTA	= _T("move_delta");
 	const LPCTSTR TAG_ANGLE_DELTA	= _T("angle_delta");

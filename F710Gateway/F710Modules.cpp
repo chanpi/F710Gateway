@@ -26,7 +26,7 @@ static const PCTSTR TAG_TERMINATION	= _T("termination");
 static const PCTSTR TAG_RTTECMODE	= _T("rttec_mode");
 
 static F710Core g_Core;
-static F710Context g_Context;
+static F710Context g_Context = {0};
 static BOOL g_bStarted = FALSE;
 
 extern int F710ExitCode;
@@ -59,7 +59,6 @@ BOOL F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 		return TRUE;
 	}
 	// 必要な初期化
-	ZeroMemory(&g_Core, sizeof(g_Core));
 	ZeroMemory(&g_Context, sizeof(g_Context));
 	g_Context.hInst = hInst;
 	g_Context.hWnd = hWnd;
@@ -90,16 +89,16 @@ BOOL F710Start(PCTSTR szXMLUri, HINSTANCE hInst, HWND hWnd)
 		}
 		// 指定なし、上記以外ならLog_Error
 	}
-	LogFileOpenW(SHARED_LOG_FILE_NAME, logLevel);
+	LogFileOpenW(SHARED_LOG_FILE_DIRECTORY, SHARED_LOG_FILE_NAME, logLevel);
 	if (logLevel <= Log_Info) {
-		LogFileOpenA(SHARED_LOGINFO_FILE_NAME, logLevel);	// プロファイル情報書き出しのため
+		LogFileOpenA(SHARED_LOG_FILE_DIRECTORY, SHARED_LOGINFO_FILE_NAME, logLevel);	// プロファイル情報書き出しのため
 	}
 
 	// 設定ファイルから終端文字を取得
 	char cTermination = '?';
 	PCTSTR szTermination = g_Context.pAnalyzer->GetGlobalValue(TAG_TERMINATION);
 	if (szTermination != NULL) {
-		char cszTermination[5];
+		char cszTermination[5] = {0};
 		if (_tcslen(szTermination) != 1) {
 			LoggingMessage(Log_Error, _T(MESSAGE_ERROR_CFG_TERMCHAR), GetLastError(), g_FILE, __LINE__);
 			szTermination = _T("?");
